@@ -456,8 +456,22 @@ async function syncStateToSupabase(){
 ============================================================ */
 const SB_CONFIG_KEY = "aitutor_supabase_config";
 let sbClient = null;
+// Приложение поставляется с уже подключённым Supabase-проектом "из коробки" —
+// обычному пользователю (не разработчику) экран «Настройка бэкенда» показывать
+// не нужно. Anon/publishable-ключ безопасен для публикации на клиенте: доступ
+// к данным ограничивается Row Level Security-политиками в самом Supabase, а
+// не секретностью ключа (см. supabase-setup.sql).
+const DEFAULT_SUPABASE_URL = "https://yxuqhlugvkjeoyealoum.supabase.co";
+const DEFAULT_SUPABASE_ANON_KEY = "sb_publishable_uivL0QYLB81L1Opt5WV-oQ_fkhrB4NV";
 function loadSbConfig(){
-  try{ return JSON.parse(localStorage.getItem(SB_CONFIG_KEY) || "null"); }catch(e){ return null; }
+  try{
+    const raw = localStorage.getItem(SB_CONFIG_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){ /* ignore */ }
+  if(DEFAULT_SUPABASE_URL && DEFAULT_SUPABASE_ANON_KEY){
+    return { url: DEFAULT_SUPABASE_URL, anonKey: DEFAULT_SUPABASE_ANON_KEY };
+  }
+  return null;
 }
 function saveSbConfig(cfg){
   try{ localStorage.setItem(SB_CONFIG_KEY, JSON.stringify(cfg)); }catch(e){ /* ignore */ }
@@ -846,9 +860,17 @@ function renderAuthScreen(msg){
   if(forgot) forgot.onclick=(e)=>{ e.preventDefault(); doPasswordReset(); };
   document.getElementById("auth-reconfigure").onclick=(e)=>{
     e.preventDefault();
-    if(confirm("Сбросить настройки подключения к Supabase на этом устройстве?")){
+    // Обычным пользователям это не нужно (бэкенд уже подключён по умолчанию,
+    // см. DEFAULT_SUPABASE_URL/DEFAULT_SUPABASE_ANON_KEY) — ссылка оставлена
+    // как ручной способ переключиться на другой Supabase-проект. Экран
+    // настройки открывается напрямую, а не через bootAuthFlow()/loadSbConfig(),
+    // иначе он бы тут же снова подставил значения по умолчанию.
+    if(confirm("Открыть ручную настройку подключения к Supabase (для другого проекта)?")){
       localStorage.removeItem(SB_CONFIG_KEY);
-      location.reload();
+      sbClient = null;
+      document.getElementById("auth-screen").classList.add("hidden");
+      document.getElementById("backend-setup").classList.remove("hidden");
+      renderBackendSetup();
     }
   };
 }
