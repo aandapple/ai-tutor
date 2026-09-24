@@ -1,0 +1,2438 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ИИ-репетитор — кыргызский и английский</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --font-head:'Albert Sans','Segoe UI',system-ui,sans-serif;
+    --font-body:'Albert Sans','Segoe UI',system-ui,sans-serif;
+    --navy:#16213E;
+    --navy-2:#223159;
+    --gold:#E3A22E;
+    --gold-soft:#4A3A1C;
+    --teal:#1F8A76;
+    --teal-soft:#123B34;
+    --coral:#E0563E;
+    --coral-soft:#4A241D;
+    --ink:#EDEFF2;
+    --paper:#05070d;
+    --card:rgba(255,255,255,0.045);
+    --card-solid:#12151f;
+    --border:rgba(255,255,255,0.09);
+    --muted:#9AA1B2;
+    --radius:14px;
+    --on-gold-soft:#F7C463;
+    --on-teal-soft:#6fe0c9;
+    --on-coral-soft:#ff9c86;
+  }
+  :root[data-theme="light"]{
+    --gold-soft:#F6DFB3; --teal-soft:#D7EEE9; --coral-soft:#F8DAD3;
+    --ink:#1A1D29; --paper:#F4F6F5; --card:#FFFFFF; --card-solid:#FFFFFF;
+    --border:#E1E4E2; --muted:#69707C;
+    --on-gold-soft:#6b4a04; --on-teal-soft:#0f5c4d; --on-coral-soft:#8a2c1c;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 60% 45% at 50% -8%, rgba(227,162,46,0.12), transparent 62%),
+      radial-gradient(ellipse 65% 55% at 8% 105%, rgba(31,138,118,0.10), transparent 60%),
+      radial-gradient(ellipse 65% 55% at 95% 15%, rgba(34,49,89,0.5), transparent 60%),
+      radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      var(--paper);
+    background-size:auto,auto,auto,26px 26px,auto;
+    background-attachment:fixed;
+    color:var(--ink); font-family:var(--font-body);
+    font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  :root[data-theme="light"] body{ background:var(--paper); }
+  h1,h2,h3,h4{font-family:var(--font-head); margin:0 0 8px; color:var(--ink); font-weight:700; letter-spacing:-0.02em;}
+  p{margin:0 0 10px;}
+  button{font-family:var(--font-body); cursor:pointer;}
+  input,select,textarea{font-family:var(--font-body); font-size:14px;}
+  a{color:inherit;}
+  ::selection{background:var(--gold-soft);}
+  .hidden{display:none !important;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    border:1px solid var(--border); background:var(--card-solid); color:var(--ink);
+    border-radius:9px; padding:10px 16px; font-size:14px; font-weight:600;
+    transition:transform .06s ease, border-color .15s ease;
+  }
+  .btn:hover{border-color:var(--navy-2);}
+  .btn:active{transform:scale(.98);}
+  .btn-primary{background:var(--navy); color:#fff; border-color:var(--navy);}
+  .btn-primary:hover{background:var(--navy-2); border-color:var(--navy-2);}
+  .btn-gold{background:var(--gold); color:#2b1c00; border-color:var(--gold);}
+  .btn-ghost{background:transparent; border-color:transparent;}
+  .btn-ghost:hover{background:var(--border);}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .btn-block{width:100%;}
+  .btn-sm{padding:6px 12px; font-size:13px; border-radius:7px;}
+  .btn-danger{color:var(--coral); border-color:var(--coral-soft);}
+  .btn-danger:hover{background:var(--coral-soft);}
+
+  /* ---------- Onboarding ---------- */
+  #onboarding, #backend-setup, #auth-screen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .auth-tabs{display:flex; gap:6px; margin-bottom:18px; background:var(--card-solid); border:1px solid var(--border); border-radius:10px; padding:4px;}
+  .auth-tab{flex:1; padding:9px; border-radius:7px; background:transparent; border:none; font-weight:700; font-size:13.5px; color:var(--muted);}
+  .auth-tab.active{background:var(--navy); color:#fff;}
+  .auth-msg{margin-top:12px; padding:11px 13px; border-radius:9px; font-size:13px; line-height:1.5;}
+  .auth-msg.ok{background:var(--teal-soft); color:var(--on-teal-soft);}
+  .auth-msg.err{background:var(--coral-soft); color:var(--on-coral-soft);}
+  .setup-code{background:var(--card-solid); border:1px solid var(--border); border-radius:9px; padding:10px 12px; font-size:12px; font-family:monospace; overflow-x:auto; white-space:pre;}
+  .ob-card{
+    width:100%; max-width:560px; background:var(--card); border:1px solid var(--border);
+    border-radius:18px; padding:34px 32px; position:relative; overflow:hidden;
+    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  }
+  .ob-mark{position:absolute; top:-40px; right:-40px; opacity:.08; width:180px; height:180px;}
+  .ob-step-label{font-size:12px; color:var(--muted); font-weight:600; letter-spacing:.02em; margin-bottom:4px;}
+  .ob-title{font-size:24px; margin-bottom:6px;}
+  .ob-sub{color:var(--muted); font-size:14px; margin-bottom:22px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--ink);}
+  .field input[type=text], .field input[type=number], .field input[type=email], .field input[type=password], .field input[type=tel], .field select{
+    width:100%; padding:11px 13px; border:1.5px solid var(--border); border-radius:10px;
+    background:var(--card-solid); color:var(--ink); font-size:14.5px;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .field input[type=text]:focus, .field input[type=number]:focus, .field input[type=email]:focus,
+  .field input[type=password]:focus, .field input[type=tel]:focus, .field select:focus{
+    outline:none; border-color:var(--navy-2); box-shadow:0 0 0 3px rgba(34,49,89,.16);
+  }
+  :root[data-theme="light"] .field input:focus, :root[data-theme="light"] .field select:focus{
+    box-shadow:0 0 0 3px rgba(34,49,89,.10);
+  }
+  .field input.field-invalid{ border-color:var(--coral) !important; }
+  .input-icon-wrap{ position:relative; }
+  .input-icon-wrap .input-icon{
+    position:absolute; left:13px; top:50%; transform:translateY(-50%);
+    font-size:15px; opacity:.55; pointer-events:none; line-height:1;
+  }
+  .input-icon-wrap input{ padding-left:38px !important; }
+  .input-icon-wrap.has-toggle input{ padding-right:40px !important; }
+  .pass-toggle{
+    position:absolute; right:4px; top:50%; transform:translateY(-50%);
+    background:transparent; border:none; font-size:15px; padding:6px 8px;
+    cursor:pointer; opacity:.55; border-radius:6px; line-height:1;
+  }
+  .pass-toggle:hover{ opacity:1; background:var(--border); }
+  .pw-strength-bar{ height:4px; border-radius:3px; background:var(--border); overflow:hidden; margin-top:8px; }
+  .pw-strength-bar > div{ height:100%; width:0%; transition:width .2s ease, background-color .2s ease; }
+  .pw-strength-label{ font-size:11.5px; margin-top:4px; color:var(--muted); }
+  .field-hint{ font-size:11.5px; color:var(--muted); margin-top:5px; }
+  .choice-row{display:flex; gap:8px; flex-wrap:wrap;}
+  .choice-pill{
+    border:1px solid var(--border); border-radius:999px; padding:9px 15px; font-size:13px;
+    background:var(--card-solid); font-weight:600; color:var(--ink);
+  }
+  .choice-pill.selected{background:var(--navy); color:#fff; border-color:var(--navy);}
+  .choice-pill[data-soon="1"]{opacity:.55;}
+  .ob-progress{display:flex; gap:5px; margin-bottom:20px;}
+  .ob-progress span{height:4px; flex:1; border-radius:2px; background:var(--border);}
+  .ob-progress span.done{background:var(--gold);}
+  .ob-actions{display:flex; justify-content:space-between; align-items:center; margin-top:22px; gap:10px;}
+
+  .test-q{background:var(--card-solid); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:14px;}
+  .test-q-meta{font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;}
+  .opt-list{display:flex; flex-direction:column; gap:8px; margin-top:10px;}
+  .opt-btn{
+    text-align:left; padding:10px 13px; border-radius:9px; border:1px solid var(--border);
+    background:var(--card-solid); font-size:14px; color:var(--ink);
+  }
+  .opt-btn.picked{border-color:var(--navy); background:var(--navy); color:#fff;}
+  .opt-btn.correct{border-color:var(--teal); background:var(--teal-soft);}
+  .opt-btn.wrong{border-color:var(--coral); background:var(--coral-soft);}
+
+  .result-badge{
+    width:96px; height:96px; border-radius:50%; background:var(--gold-soft); color:var(--on-gold-soft);
+    display:flex; align-items:center; justify-content:center; font-family:var(--font-head);
+    font-size:30px; font-weight:800; margin:0 auto 14px;
+  }
+
+  /* ---------- App shell ---------- */
+  #app{display:grid; grid-template-columns:236px 1fr; min-height:100vh;}
+  .sidebar{
+    background:var(--navy); color:#fff; padding:22px 16px; display:flex; flex-direction:column;
+    position:sticky; top:0; height:100vh;
+  }
+  .brand{display:flex; align-items:center; gap:10px; margin-bottom:26px; padding:0 6px;}
+  .brand-mark{width:34px; height:34px; flex:none;}
+  .brand-name{font-family:var(--font-head); font-weight:800; font-size:15px; line-height:1.2;}
+  .brand-sub{font-size:10.5px; color:#B9C2DA; font-weight:500;}
+  nav.navlist{display:flex; flex-direction:column; gap:3px; flex:1;}
+  .nav-item{
+    display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:9px;
+    color:#D7DCEA; font-size:13.5px; font-weight:600; background:transparent; border:none; text-align:left;
+    width:100%;
+  }
+  .nav-item .ico{width:18px; text-align:center; font-size:15px;}
+  .nav-item:hover{background:rgba(255,255,255,.06); color:#fff;}
+  .nav-item.active{background:rgba(227,162,46,.16); color:var(--gold);}
+  .side-stats{border-top:1px solid rgba(255,255,255,.12); margin-top:14px; padding-top:14px; font-size:12px; color:#B9C2DA; display:flex; gap:14px;}
+  .side-stat b{display:block; color:#fff; font-size:15px; font-family:var(--font-head);}
+
+  main.content{padding:30px 36px 60px; max-width:920px;}
+  .page-head{margin-bottom:22px;}
+  .eyebrow{font-size:12px; color:var(--muted); font-weight:700;}
+
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:640px){.grid-2{grid-template-columns:1fr;}}
+
+  .card{background:var(--card); border:1px solid var(--border); border-radius:14px; padding:20px; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);}
+  .card + .card{margin-top:14px;}
+
+  .stat-row{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:18px;}
+  .stat-chip{
+    flex:1; min-width:120px; background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:14px 16px; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  }
+  .stat-chip .num{font-family:var(--font-head); font-size:24px; font-weight:800;}
+  .stat-chip .lbl{font-size:12px; color:var(--muted); font-weight:600;}
+
+  .badge{display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px;}
+  .badge-level{background:var(--gold-soft); color:var(--on-gold-soft);}
+  .badge-done{background:var(--teal-soft); color:var(--teal);}
+  .badge-progress{background:var(--border); color:var(--muted);}
+
+  .lesson-card{display:flex; justify-content:space-between; align-items:center; gap:14px; padding:16px 18px;}
+  .lesson-card h3{font-size:15px; margin-bottom:2px;}
+  .lesson-card p{font-size:12.5px; color:var(--muted); margin:0;}
+
+  .exercise-box{margin-top:16px;}
+  .fill-line{font-size:16px; line-height:1.9;}
+  .fill-input{border:none; border-bottom:2px solid var(--navy); background:transparent; width:140px; font-size:16px; padding:2px 4px; color:var(--ink); font-weight:700;}
+  .match-cols{display:flex; gap:24px; margin-top:10px;}
+  .match-col{flex:1; display:flex; flex-direction:column; gap:8px;}
+  .match-item{padding:9px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--card-solid); cursor:grab;}
+  .match-item.sel{border-color:var(--gold); background:var(--gold-soft);}
+  .match-item.paired{border-color:var(--teal); background:var(--teal-soft);}
+  .match-item.drag-over{border-color:var(--gold); box-shadow:inset 0 0 0 2px var(--gold);}
+  .pron-detail{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;}
+  .pron-chip{padding:3px 9px; border-radius:999px; font-size:12.5px; font-weight:600;}
+  .pron-ok{background:var(--teal-soft); color:var(--on-teal-soft);}
+  .pron-bad{background:var(--coral-soft); color:var(--on-coral-soft);}
+  .feedback-box{margin-top:14px; padding:13px 15px; border-radius:10px; font-size:13.5px;}
+  .feedback-ok{background:var(--teal-soft); color:var(--on-teal-soft);}
+  .feedback-bad{background:var(--coral-soft); color:var(--on-coral-soft);}
+  .ai-inline{margin-top:10px; font-size:13px; color:var(--muted); font-style:italic;}
+
+  .progress-track{height:6px; background:var(--border); border-radius:4px; overflow:hidden; margin:8px 0 16px;}
+  .progress-fill{height:100%; background:var(--gold);}
+
+  /* Chat */
+  .chat-wrap{display:flex; flex-direction:column; height:calc(100vh - 150px); background:var(--card); border:1px solid var(--border); border-radius:14px; overflow:hidden; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);}
+  .chat-log{flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px;}
+  .msg{max-width:78%; padding:10px 14px; border-radius:14px; font-size:14px; line-height:1.5;}
+  .msg-ai{align-self:flex-start; background:var(--card-solid); border:1px solid var(--border); border-bottom-left-radius:4px;}
+  .msg-user{align-self:flex-end; background:var(--navy); color:#fff; border-bottom-right-radius:4px;}
+  .msg-meta{font-size:10.5px; color:var(--muted); margin-bottom:3px; font-weight:700;}
+  .chat-input-row{display:flex; gap:8px; padding:14px; border-top:1px solid var(--border);}
+  .chat-input-row input{flex:1; padding:11px 14px; border-radius:10px; border:1px solid var(--border); background:var(--card-solid); color:var(--ink);}
+  .typing{display:inline-flex; gap:3px; align-items:center;}
+  .typing span{width:5px; height:5px; border-radius:50%; background:var(--muted); animation:blink 1.2s infinite;}
+  .typing span:nth-child(2){animation-delay:.2s;} .typing span:nth-child(3){animation-delay:.4s;}
+  @keyframes blink{0%,80%,100%{opacity:.25;} 40%{opacity:1;}}
+  @keyframes scaleIn{from{opacity:0; transform:scale(.85);} to{opacity:1; transform:scale(1);}}
+  .animate-scale-in{animation:scaleIn .6s cubic-bezier(.16,1,.3,1) both;}
+
+  /* Vocab */
+  .vocab-row{display:flex; justify-content:space-between; align-items:center; padding:11px 4px; border-bottom:1px solid var(--border); font-size:14px;}
+  .vocab-row:last-child{border-bottom:none;}
+  .box-dot{display:inline-flex; gap:3px;}
+  .box-dot i{width:6px; height:6px; border-radius:50%; background:var(--border); display:inline-block;}
+  .box-dot i.on{background:var(--teal);}
+  .flash-card{
+    background:var(--card); border:1px solid var(--border); border-radius:16px; padding:50px 30px;
+    text-align:center; min-height:180px; display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-head); font-size:26px; font-weight:800; cursor:pointer;
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  }
+  .rate-row{display:flex; gap:8px; margin-top:16px;}
+  .rate-row .btn{flex:1;}
+
+  /* Progress calendar */
+  .cal-grid{display:grid; grid-template-columns:repeat(14,1fr); gap:4px; margin-top:10px;}
+  .cal-cell{aspect-ratio:1; border-radius:3px; background:var(--border);}
+  .cal-cell.on{background:var(--teal);}
+
+  /* Динамика ошибок (п.5.9 ТЗ) — простой столбчатый тренд по дням */
+  .trend-row{display:flex; align-items:flex-end; gap:3px; height:56px; margin-top:10px;}
+  .trend-bar{flex:1; background:var(--coral-soft); border-radius:3px 3px 0 0; min-height:3px; position:relative;}
+  .trend-bar.empty{background:var(--border);}
+  .skill-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px solid var(--border); font-size:13.5px;}
+  .skill-row:last-child{border-bottom:none;}
+  .skill-bar-track{flex:1; height:6px; background:var(--border); border-radius:4px; margin:0 10px; overflow:hidden;}
+  .skill-bar-fill{height:100%; background:var(--teal);}
+
+  .toast{
+    position:fixed; bottom:22px; right:22px; background:var(--navy); color:#fff; padding:13px 18px;
+    border-radius:10px; font-size:13.5px; font-weight:600; box-shadow:0 8px 24px rgba(0,0,0,.2);
+    display:flex; align-items:center; gap:10px; z-index:50; transform:translateY(20px); opacity:0;
+    transition:all .25s ease; pointer-events:none;
+  }
+  .toast.show{transform:translateY(0); opacity:1;}
+
+  select.lang-select{background:var(--card-solid); border:1px solid var(--border); border-radius:8px; padding:6px 10px; color:var(--ink);}
+
+  .switch{position:relative; display:inline-block; width:40px; height:22px;}
+  .switch input{opacity:0; width:0; height:0;}
+  .slider{position:absolute; inset:0; background:var(--border); border-radius:22px; transition:.15s;}
+  .slider:before{content:""; position:absolute; height:16px; width:16px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.15s;}
+  input:checked + .slider{background:var(--teal);}
+  input:checked + .slider:before{transform:translateX(18px);}
+
+  @media (max-width:760px){
+    #app{grid-template-columns:1fr; grid-template-rows:auto 1fr;}
+    .sidebar{position:sticky; top:0; height:auto; flex-direction:row; align-items:center; overflow-x:auto; padding:12px;}
+    .brand{margin-bottom:0; margin-right:10px;}
+    .brand-sub{display:none;}
+    nav.navlist{flex-direction:row; flex:none;}
+    .nav-item{white-space:nowrap;}
+    .side-stats{display:none;}
+    main.content{padding:18px 16px 48px;}
+    .match-cols{gap:12px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= BACKEND SETUP (Supabase URL/ключ) ================= -->
+<div id="backend-setup" class="hidden">
+  <div class="ob-card">
+    <div id="backend-setup-content"></div>
+  </div>
+</div>
+
+<!-- ================= AUTH (регистрация/вход по e-mail, п.5.1 ТЗ) ================= -->
+<div id="auth-screen" class="hidden">
+  <div class="ob-card">
+    <div id="auth-content"></div>
+  </div>
+</div>
+
+<!-- ================= ONBOARDING ================= -->
+<div id="onboarding" class="hidden">
+  <div class="ob-card">
+    <svg class="ob-mark" viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="50" cy="50" r="46"/><circle cx="50" cy="50" r="34"/><circle cx="50" cy="50" r="8"/>
+      <path d="M50 4 L50 16 M50 84 L50 96 M4 50 L16 50 M84 50 L96 50 M17 17 L25 25 M75 75 L83 83 M17 83 L25 75 M75 25 L83 17"/>
+    </g></svg>
+    <div id="ob-content"></div>
+  </div>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div id="app" class="hidden">
+  <aside class="sidebar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 100 100"><g fill="none" stroke="#E3A22E" stroke-width="6">
+        <circle cx="50" cy="50" r="42"/><circle cx="50" cy="50" r="14"/>
+        <path d="M50 2 L50 20 M50 80 L50 98 M2 50 L20 50 M80 50 L98 50"/>
+      </g></svg>
+      <div>
+        <div class="brand-name">ИИ-репетитор</div>
+        <div class="brand-sub" id="brand-sub">кыргызский · английский</div>
+      </div>
+    </div>
+    <nav class="navlist" id="navlist"></nav>
+    <div class="side-stats">
+      <div class="side-stat"><b id="side-xp">0</b>XP</div>
+      <div class="side-stat"><b id="side-streak">0</b>дней подряд</div>
+    </div>
+  </aside>
+  <main class="content" id="main-content"></main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Клиент Supabase (п.5.1 ТЗ — реальная регистрация/вход по e-mail с настоящим
+     бэкендом, а не локальной имитацией). Anon-ключ Supabase рассчитан на то,
+     чтобы быть публичным на клиенте — доступ к данным ограничивается Row Level
+     Security-политиками на стороне Supabase, а не секретностью ключа. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   I18N — интерфейс: русский / кыргызский / английский (п.1 ТЗ)
+   Переведён костяк интерфейса; полная локализация контента уроков —
+   отдельная задача для методистов на следующих этапах.
+============================================================ */
+const I18N = {
+  ru:{ navHome:"Главная", navLessons:"Уроки", navDialogue:"Диалог с ИИ", navVocab:"Словарь",
+       navProgress:"Прогресс", navProfile:"Профиль", navAdmin:"Админ-панель", streakUnit:"дней подряд" },
+  ky:{ navHome:"Башкы бет", navLessons:"Сабактар", navDialogue:"ЖИ менен маек", navVocab:"Сөздүк",
+       navProgress:"Прогресс", navProfile:"Профиль", navAdmin:"Админ-панель", streakUnit:"күн катары менен" },
+  en:{ navHome:"Home", navLessons:"Lessons", navDialogue:"AI Dialogue", navVocab:"Vocabulary",
+       navProgress:"Progress", navProfile:"Profile", navAdmin:"Admin panel", streakUnit:"day streak" }
+};
+function t(key){ const lang = state.profile.interfaceLang || "ru"; return (I18N[lang] && I18N[lang][key]) || I18N.ru[key] || key; }
+
+/* ============================================================
+   STATE — хранится локально в браузере (per-viewer, localStorage).
+============================================================ */
+const STORE_KEY = "aitutor_state_v1";
+let state = loadState();
+
+// Доступ к панели администратора (п.5.13 ТЗ) закреплён за одним конкретным
+// аккаунтом (по e-mail, с которым выполнен вход через Supabase), а не за
+// переключателем роли, который мог бы включить себе любой пользователь.
+const ADMIN_EMAIL = "miniytjamin@gmail.com";
+function isAdminUser(){
+  return !!state.userEmail && state.userEmail.trim().toLowerCase() === ADMIN_EMAIL;
+}
+
+function defaultState(){
+  return {
+    profile:{ name:"", age:"", goal:"", targetLangs:["en"], interfaceLang:"ru", timezone:"Asia/Bishkek (UTC+6)", notifications:true, plan:"free" },
+    userId:null, userEmail:null, // связь с аккаунтом Supabase (п.5.1 ТЗ) — заполняется после входа/регистрации
+    onboardingDone:false,
+    level:null, levelSource:null, entryScore:null,
+    kyLevel:null, // отдельная шкала уровней для кыргызского (п.5.2 ТЗ): не знаю/начальный/бытовой/свободный
+    weeklyLessons:4, // расчётное количество уроков в неделю; доступно для ручной корректировки (п.5.3 ТЗ)
+    lessonsProgress:{}, // id -> {status, bestScore, attempts, lastCompletedAt}
+    xp:0, streak:{count:0,last:null}, activity:{},
+    dailyXp:{}, // дата -> XP за день (для еженедельного/месячного отчёта, п.5.9 ТЗ)
+    studyMinutes:0, lastActivityTs:null, // накопленное время занятий (п.5.9 ТЗ) — см. trackStudyTime()
+    skillStats:{}, // тип упражнения -> {correct, total} (для "% усвоения грамматики" и др., п.5.9 ТЗ)
+    vocab:[], badges:[], errorsLog:[],
+    dialogue:[], // persisted EN chat turns for continuity; each turn has a stable {id}
+    dialogueKy:[], // отдельная история диалога на кыргызском (текстовый режим, п.5.5 ТЗ)
+    contentOverrides:{ hiddenLessons:[] }, // id уроков, скрытых администратором
+    moderationLog:[], // {id, ts, msgId, text, category, status:"pending"|"reviewed"|"removed"}
+    lastReminderDate:null // дата последнего показанного напоминания (п.5.11 ТЗ) — не чаще раза в день
+  };
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    return Object.assign(defaultState(), parsed);
+  }catch(e){ return defaultState(); }
+}
+let sbSyncTimer = null;
+function saveState(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){ /* хранилище недоступно — работаем в памяти */ }
+  // Синхронизация с Supabase (п.5.1 ТЗ): если пользователь вошёл по e-mail,
+  // его данные дублируются на сервер, чтобы прогресс не терялся при смене
+  // устройства/браузера. Если бэкенд не настроен или сессии нет — просто
+  // работаем локально, как и раньше.
+  if(sbClient && state.userId){
+    clearTimeout(sbSyncTimer);
+    sbSyncTimer = setTimeout(()=>{ syncStateToSupabase(); }, 900);
+  }
+}
+async function syncStateToSupabase(){
+  if(!sbClient || !state.userId) return;
+  try{
+    const { error } = await sbClient.from("app_state").upsert({
+      user_id: state.userId, data: state, updated_at: new Date().toISOString()
+    });
+    if(error) console.error("Supabase: не удалось сохранить прогресс на сервере —", error.message);
+  }catch(e){ console.error("Supabase: ошибка синхронизации —", e.message||e); }
+}
+
+/* ============================================================
+   SUPABASE — бэкенд для регистрации/входа по e-mail (п.5.1 ТЗ).
+   Конфигурация (URL проекта + публичный anon-ключ) вводится один раз
+   через экран «Настройка бэкенда» и хранится в localStorage — это
+   позволяет разворачивать один и тот же index.html на любом статическом
+   хостинге без пересборки. Anon-ключ безопасен для клиента: доступ к
+   данным ограничивается Row Level Security-политиками в самом Supabase,
+   а не секретностью ключа (см. README/инструкцию по настройке).
+============================================================ */
+const SB_CONFIG_KEY = "aitutor_supabase_config";
+let sbClient = null;
+function loadSbConfig(){
+  try{ return JSON.parse(localStorage.getItem(SB_CONFIG_KEY) || "null"); }catch(e){ return null; }
+}
+function saveSbConfig(cfg){
+  try{ localStorage.setItem(SB_CONFIG_KEY, JSON.stringify(cfg)); }catch(e){ /* ignore */ }
+}
+function initSupabaseClient(){
+  const cfg = loadSbConfig();
+  if(!cfg || !cfg.url || !cfg.anonKey) return null;
+  if(typeof window.supabase === "undefined" || !window.supabase.createClient){
+    console.error("Supabase JS SDK не загрузился (нет сети/CDN заблокирован).");
+    return null;
+  }
+  try{
+    sbClient = window.supabase.createClient(cfg.url, cfg.anonKey);
+  }catch(e){
+    console.error("Не удалось создать клиент Supabase:", e.message||e);
+    sbClient = null;
+  }
+  return sbClient;
+}
+
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function markActivity(){
+  const d = todayStr();
+  state.activity[d] = true;
+  const last = state.streak.last;
+  if(last !== d){
+    const y = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    state.streak.count = (last === y) ? state.streak.count+1 : 1;
+    state.streak.last = d;
+  }
+  saveState();
+}
+function addXP(n){
+  state.xp += n;
+  const d = todayStr();
+  state.dailyXp[d] = (state.dailyXp[d]||0) + n;
+  trackStudyTime();
+  markActivity(); checkBadges(); saveState(); renderSidebar();
+}
+// Приблизительное "время занятий" (п.5.9 ТЗ): накапливает реальное прошедшее
+// время между действиями в уроках/диалоге/повторении, но не более 3 минут за
+// один "прыжок" — иначе открытая, но неактивная вкладка накручивала бы часы.
+function trackStudyTime(){
+  const now = Date.now();
+  if(state.lastActivityTs){
+    const gapMin = (now - state.lastActivityTs) / 60000;
+    state.studyMinutes = (state.studyMinutes||0) + Math.max(0, Math.min(gapMin, 3));
+  }
+  state.lastActivityTs = now;
+}
+// Суммарная точность по типу упражнения (п.5.9 ТЗ: "% усвоения грамматики" и
+// аналогичные показатели по другим темам банка упражнений, п.5.7 ТЗ).
+function recordSkillAttempt(type, correct){
+  if(!type) return;
+  if(!state.skillStats[type]) state.skillStats[type] = {correct:0, total:0};
+  state.skillStats[type].total++;
+  if(correct) state.skillStats[type].correct++;
+}
+
+/* ============================================================
+   НАПОМИНАНИЯ (п.5.11 ТЗ): «Push-уведомления о необходимости
+   позаниматься» и «напоминания о повторении слов».
+   Честное ограничение: браузерный Notification API работает только
+   пока вкладка/приложение открыты в этом браузере — настоящий push,
+   когда приложение закрыто, требует сервера и service worker (см. п.8
+   ТЗ про инфраструктурные ограничения), поэтому здесь не имитируется.
+============================================================ */
+function maybeShowStudyReminder(){
+  if(!state.profile.notifications) return;
+  if(typeof Notification === "undefined" || Notification.permission !== "granted") return;
+  const today = todayStr();
+  if(state.lastReminderDate === today) return; // не чаще одного напоминания в день
+  const dueWords = state.vocab.filter(v=>v.nextReview<=today).length;
+  let body = null;
+  if(dueWords>0){
+    body = `${dueWords} слов${dueWords===1?"о":""} в вашем словаре ждут повторения.`;
+  }else if(state.streak.last !== today){
+    body = "Не забудьте позаниматься сегодня, чтобы не потерять серию!";
+  }
+  if(body){
+    try{
+      new Notification("ИИ-репетитор", { body, tag:"aitutor-reminder" });
+      state.lastReminderDate = today;
+      saveState();
+    }catch(e){ /* уведомления недоступны в этом окружении — тихо пропускаем */ }
+  }
+}
+function checkBadges(){
+  const has = id => state.badges.includes(id);
+  const give = id => { if(!has(id)){ state.badges.push(id); toast("🏅 Новый значок открыт!"); } };
+  const doneCount = Object.values(state.lessonsProgress).filter(l=>l.status==="done").length;
+  if(doneCount>=1) give("first_lesson");
+  if(state.streak.count>=3) give("streak3");
+  if(state.streak.count>=7) give("streak7");
+  if(state.vocab.length>=20) give("vocab20");
+  if(state.dialogue.length>=2 || (state.dialogueKy&&state.dialogueKy.length>=2)) give("first_dialogue");
+}
+function toast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(()=>el.classList.remove("show"), 2600);
+}
+
+/* ============================================================
+   ВХОДНОЙ ТЕСТ (п.5.2 ТЗ) — грамматика + лексика, вес по уровню CEFR
+============================================================ */
+const ENTRY_TEST = [
+  {level:"A1", w:1, q:"I ___ a student.", opts:["am","is","are"], a:0},
+  {level:"A1", w:1, q:"She ___ to school every day.", opts:["go","goes","going"], a:1},
+  {level:"A2", w:2, q:"They ___ watching a movie right now.", opts:["is","am","are"], a:2},
+  {level:"A2", w:2, q:"Yesterday I ___ to the park.", opts:["go","went","goed"], a:1},
+  {level:"A2", w:2, type:"listening", audioText:"The train leaves at nine o'clock in the morning.",
+    q:"Во сколько отправляется поезд, судя по фразе?", opts:["В девять утра","В девять вечера","В девятнадцать часов"], a:0},
+  {level:"A2", w:2, type:"reading",
+    passage:"Maria works at a small bakery in the city center. She starts work at six in the morning and finishes at two in the afternoon. She likes her job because she meets many friendly people every day.",
+    q:"Во сколько Мария заканчивает работу?", opts:["В два часа дня","В шесть утра","В десять вечера"], a:0},
+  {level:"B1", w:3, q:"If it rains, I ___ stay home.", opts:["will","would","am"], a:0},
+  {level:"B1", w:3, q:"Opposite of 'expensive':", opts:["cheap","costly","rich"], a:0},
+  {level:"B1", w:3, q:"She has been living here ___ 2015.", opts:["since","for","from"], a:0},
+  {level:"B1", w:3, type:"listening", audioText:"Although it was raining, they decided to go for a walk in the park.",
+    q:"Что решили сделать, несмотря на дождь?", opts:["Пойти гулять в парк","Остаться дома","Поехать на машине"], a:0},
+  {level:"B1", w:3, type:"reading",
+    passage:"Even though the weather forecast predicted heavy rain all weekend, the community festival went ahead as planned, and organizers were relieved when the sun broke through the clouds just before the opening ceremony.",
+    q:"Что произошло с погодой перед открытием фестиваля?", opts:["Выглянуло солнце","Начался сильный дождь","Фестиваль отменили"], a:0},
+  {level:"B2", w:4, q:"By the time we arrived, the movie ___.", opts:["had started","has started","started"], a:0},
+  {level:"B2", w:4, q:"Closest in meaning to 'significant':", opts:["small","important","funny"], a:1},
+  {level:"C1", w:5, q:"Hardly ___ the meeting begun when the alarm rang.", opts:["has","did","had"], a:2},
+];
+// Пороги подобраны пропорционально исходным (максимум суммы весов вырос
+// после добавления вопросов на аудирование/чтение, п.5.2 ТЗ).
+function levelFromScore(score){
+  if(score<=7) return "A1"; if(score<=14) return "A2"; if(score<=22) return "B1";
+  if(score<=30) return "B2"; return "C1";
+}
+
+/* ============================================================
+   УРОКИ (п.5.4 ТЗ) — демонстрационный банк, английский язык (MVP)
+============================================================ */
+const EN_LESSONS = [
+  { id:"l1", lang:"en", level:"A1", title:"Present Simple: routines",
+    explain:"Present Simple используется для привычных действий и фактов. С he/she/it к глаголу добавляется -s: I work → she works. Отрицание и вопрос строятся с do/does.",
+    examples:["I work every day.","She works in a hospital.","Do you like tea?"],
+    exercises:[
+      {type:"mcq", q:"He ___ football every weekend.", opts:["play","plays","playing"], a:1,
+        explain:"С 'he' (3-е лицо ед. числа) к глаголу добавляется -s: plays."},
+      {type:"fill", sentence:"My sister ___ (work) at a bank.", answers:["works"],
+        explain:"Подлежащее 'my sister' = she → глагол с -s: works."},
+      {type:"mcq", q:"___ you speak English?", opts:["Do","Does","Is"], a:0,
+        explain:"Подлежащее 'you' → вспомогательный глагол do."},
+      {type:"translate", prompt:"Переведите: «Она не пьёт кофе.»", answers:["she doesn't drink coffee","she does not drink coffee"],
+        explain:"Отрицание в Present Simple с he/she/it: doesn't + основа глагола (без -s)."},
+      {type:"match", pairs:[["I work","Я работаю"],["She works","Она работает"],["We don't work","Мы не работаем"],["Do they work?","Они работают?"]]},
+      {type:"listen", audioText:"She works at a hospital every day.", question:"Где работает she по фразе?", opts:["В больнице","В школе","В магазине"], a:0,
+        explain:"'She works at a hospital' — «Она работает в больнице»."}
+    ],
+    miniTest:[
+      {q:"Как правильно: 'She ___ every day.'", opts:["work","works","working"], a:1, explain:"С 'she' к глаголу добавляется -s: works."},
+      {q:"Что добавляется к глаголу с he/she/it в Present Simple?", opts:["-ing","-ed","-s"], a:2, explain:"3-е лицо ед. числа → окончание -s."}
+    ] },
+  { id:"l2", lang:"en", level:"A1", title:"Greetings & Introductions",
+    explain:"Базовые фразы для знакомства и приветствия на английском — то, с чего начинается любой разговор.",
+    examples:["Nice to meet you!","How are you doing?","My name is Anna."],
+    exercises:[
+      {type:"mcq", q:"Ответ на 'How are you?' обычно:", opts:["I'm 25.","I'm fine, thanks.","I'm from Bishkek."], a:1,
+        explain:"'How are you?' — вопрос о самочувствии, а не о возрасте или месте."},
+      {type:"fill", sentence:"Nice to ___ you!", answers:["meet"], explain:"Устойчивое выражение: nice to meet you."},
+      {type:"translate", prompt:"Переведите: «Меня зовут Марат.»", answers:["my name is marat"], explain:"My name is + имя."},
+      {type:"match", pairs:[["Good morning","Доброе утро"],["See you later","Увидимся позже"],["Take care","Береги себя"],["Excuse me","Извините"]]},
+      {type:"pronounce", phrase:"Nice to meet you", explain:"Ударение на meet: nice to MEET you. Звук 'ee' в meet долгий, как в see."}
+    ],
+    miniTest:[
+      {q:"Как ответить на «Nice to meet you!»?", opts:["Nice to meet you too!","Goodbye!","I'm 20."], a:0, explain:"Естественный ответный вариант — тоже 'Nice to meet you too!'."},
+      {q:"«My name is ...» переводится как:", opts:["Меня зовут ...","Мне ... лет","Я живу в ..."], a:0, explain:"'My name is' — «Меня зовут»."}
+    ] },
+  { id:"l3", lang:"en", level:"A2", title:"Present Continuous: actions now",
+    explain:"Present Continuous (be + глагол-ing) описывает действие, происходящее прямо сейчас или временную ситуацию.",
+    examples:["I am reading a book right now.","They are traveling this month.","Is she working today?"],
+    exercises:[
+      {type:"mcq", q:"Look! It ___ raining.", opts:["is","are","do"], a:0, explain:"'It' → is + глагол-ing."},
+      {type:"fill", sentence:"We ___ (have) dinner at the moment.", answers:["are having"],
+        explain:"'We' → are + having. Обратите внимание на выпадение 'e' перед -ing."},
+      {type:"translate", prompt:"Переведите: «Они сейчас смотрят фильм.»", answers:["they are watching a movie","they are watching a film"],
+        explain:"Present Continuous: are + watching."},
+      {type:"listen", audioText:"Look! It is raining outside right now.", question:"Что происходит прямо сейчас по фразе?", opts:["Идёт дождь","Светит солнце","Идёт снег"], a:0,
+        explain:"'It is raining right now' — «Сейчас идёт дождь»."}
+    ],
+    miniTest:[
+      {q:"Present Continuous образуется как:", opts:["be + глагол-ing","do/does + глагол","глагол + ed"], a:0, explain:"be (am/is/are) + глагол с -ing."},
+      {q:"Переведите: «Он сейчас читает книгу.»", opts:["He is reading a book now.","He reads a book every day.","He read a book yesterday."], a:0, explain:"Действие прямо сейчас → Present Continuous: is reading."}
+    ] },
+  { id:"l4", lang:"en", level:"A2", title:"Past Simple: talking about yesterday",
+    explain:"Past Simple используется для завершённых действий в прошлом. Правильные глаголы получают -ed, неправильные меняют форму (go → went).",
+    examples:["I visited my grandmother last week.","She didn't call me yesterday.","Did you finish your homework?"],
+    exercises:[
+      {type:"mcq", q:"Yesterday I ___ to the park.", opts:["go","went","goes"], a:1, explain:"'Go' — неправильный глагол: go → went."},
+      {type:"fill", sentence:"They ___ (not / finish) the project on time.", answers:["did not finish","didn't finish"],
+        explain:"Отрицание в Past Simple: did not / didn't + основа глагола."},
+      {type:"translate", prompt:"Переведите: «Ты звонил мне вчера?»", answers:["did you call me yesterday"], explain:"Вопрос в Past Simple: Did + подлежащее + основа глагола."},
+      {type:"reading",
+        passage:"Last weekend, Aidana visited her grandmother in Osh. She took the bus early in the morning and arrived by lunchtime. They cooked together and talked for hours.",
+        q:"Куда поехала Айдана на прошлых выходных?", opts:["В Ош","В Бишкек","За границу"], a:0,
+        explain:"'Aidana visited her grandmother in Osh' — «Айдана поехала к бабушке в Ош»."}
+    ],
+    miniTest:[
+      {q:"Как образуется Past Simple у правильных глаголов?", opts:["+ -ing","+ -ed","+ -s"], a:1, explain:"Правильные глаголы получают окончание -ed: visit → visited."},
+      {q:"'go' в прошедшем времени:", opts:["goed","went","gone"], a:1, explain:"'Go' — неправильный глагол: go → went."}
+    ] }
+];
+
+/* ============================================================
+   КЫРГЫЗСКИЙ — текстовый стартовый курс (без озвучки).
+   Раздел 8 ТЗ: речевые технологии (STT/TTS) для кыргызского требуют
+   отдельного R&D, поэтому голосовые упражнения здесь не предлагаются.
+   Контент черновой и требует проверки носителем/методистом (раздел 9 ТЗ
+   и реестр рисков анализа) перед реальным использованием.
+============================================================ */
+const KY_LESSONS = [
+  { id:"ky1", lang:"ky", level:"Алиппе", title:"Кыргыз алфавити: 3 өзгөчө тамга",
+    explain:"Кыргыз алфавити орус алфавитине окшош, бирок 3 кошумча тамга бар: Ң, Ө, Ү. Алар орус тилинде жок үндөрдү билдирет. Бул сабак азырынча текст түрүндө — үн менен окулушу кийинки этапта кошулат.",
+    examples:["Ң — маңдай (лоб)","Ө — бөрү (волк)","Ү — үй (дом)"],
+    exercises:[
+      {type:"mcq", q:"Кайсы тамга орус алфавитинде жок?", opts:["А","Ң","М"], a:1,
+        explain:"Ң, Ө, Ү — кыргыз тилине гана мүнөздүү тамгалар."},
+      {type:"match", pairs:[["үй","дом"],["бөрү","волк"],["маңдай","лоб"],["китеп","книга"]]},
+      {type:"mcq", q:"«Үй» деген сөз эмнени билдирет?", opts:["дом","вода","хлеб"], a:0,
+        explain:"«Үй» — дом. Бул эң көп колдонулган сөздөрдүн бири."}
+    ],
+    miniTest:[
+      {q:"Кыргыз алфавитинде канча кошумча тамга бар (орус алфавитине салыштырмалуу)?", opts:["1","2","3"], a:2, explain:"Кошумча тамгалар: Ң, Ө, Ү."},
+      {q:"«Бөрү» деген сөз орусча кандай?", opts:["волк","дом","книга"], a:0, explain:"«Бөрү» — волк."}
+    ] },
+  { id:"ky2", lang:"ky", level:"Алиппе", title:"Саламдашуу (приветствия)",
+    explain:"Негизги саламдашуу сөздөрү — сүйлөшүүнүн башталышы. «Салам» — эң кеңири колдонулган саламдашуу.",
+    examples:["Салам! — Привет!","Кандайсыз? — Как дела? (вежливо)","Рахмат! — Спасибо!"],
+    exercises:[
+      {type:"mcq", q:"«Рахмат» деген сөз кандай маанини билдирет?", opts:["Пожалуйста","Спасибо","Извините"], a:1,
+        explain:"«Рахмат» — спасибо. Бул сөз көп тилдерде окшош угулат (арабча тамырдан)."},
+      {type:"match", pairs:[["Салам","Привет"],["Рахмат","Спасибо"],["Ооба","Да"],["Жок","Нет"]]},
+      {type:"mcq", q:"Учурашканда сылык суроо:", opts:["Кандайсыз?","Кайдасың?","Эмне бул?"], a:0,
+        explain:"«Кандайсыз?» — вежливая форма «как дела» (на «вы»)."}
+    ],
+    miniTest:[
+      {q:"«Салам» деген сөз эмнени билдирет?", opts:["Привет","Пока","Спасибо"], a:0, explain:"«Салам» — самое частое приветствие, «Привет»."},
+      {q:"«Кандайсыз?» деп ким-кимге айтылат?", opts:["Сылык түрдө (сиз)","Жакын адамга гана","Балдарга гана"], a:0, explain:"«Кандайсыз?» — вежливая форма обращения (на «вы»)."}
+    ] }
+];
+
+const LESSONS = EN_LESSONS.concat(KY_LESSONS);
+
+/* Отдельная шкала уровней для кыргызского языка (п.5.2 ТЗ) —
+   самооценка пользователя, т.к. полноценный входной тест для
+   кыргызского не входит в объём этого демо (см. допущения анализа ТЗ). */
+const KY_LEVELS = [
+  {id:"none", label:"Не знаю"},
+  {id:"basic", label:"Начальный"},
+  {id:"everyday", label:"Бытовой"},
+  {id:"fluent", label:"Свободный"}
+];
+function kyLevelLabel(id){ const l = KY_LEVELS.find(x=>x.id===id); return l ? l.label : "Не указан"; }
+
+/* ============================================================
+   ЭКРАН «НАСТРОЙКА БЭКЕНДА» — ввод URL/anon-ключа проекта Supabase.
+   Показывается один раз на устройстве/браузере, пока конфигурация не
+   сохранена в localStorage (см. SB_CONFIG_KEY выше).
+============================================================ */
+function renderBackendSetup(){
+  const root = document.getElementById("backend-setup-content");
+  root.innerHTML = `
+    <div class="ob-step-label">НАСТРОЙКА БЭКЕНДА</div>
+    <h2 class="ob-title">Подключите Supabase для регистрации по e-mail</h2>
+    <p class="ob-sub">Чтобы аккаунты и прогресс пользователей действительно сохранялись на сервере, нужно один раз указать данные вашего бесплатного проекта Supabase. Их можно найти в панели проекта: Project Settings → API.</p>
+    <div class="field"><label>Project URL</label><input type="text" id="sb-url" placeholder="https://xxxxxxxx.supabase.co"></div>
+    <div class="field"><label>Anon public key</label><input type="text" id="sb-key" placeholder="eyJhbGciOi..."></div>
+    <div id="sb-setup-err"></div>
+    <div class="ob-actions"><span></span><button class="btn btn-primary" id="sb-save">Сохранить и продолжить →</button></div>
+    <p style="font-size:12px;color:var(--muted);margin-top:16px;">Anon-ключ предназначен для использования на клиенте — он не даёт доступа к данным напрямую, доступ ограничивается Row Level Security-политиками в самом Supabase. SQL для создания нужной таблицы и политик — в файле supabase-setup.sql, который идёт вместе с этим приложением.</p>`;
+  document.getElementById("sb-save").onclick=async ()=>{
+    const url = document.getElementById("sb-url").value.trim();
+    const key = document.getElementById("sb-key").value.trim();
+    const errBox = document.getElementById("sb-setup-err");
+    if(!/^https:\/\/.+\.supabase\.co\/?$/.test(url) || !key){
+      errBox.innerHTML = `<div class="auth-msg err">Проверьте URL (вида https://xxxx.supabase.co) и ключ — оба поля обязательны.</div>`;
+      return;
+    }
+    saveSbConfig({ url: url.replace(/\/$/,""), anonKey: key });
+    const client = initSupabaseClient();
+    if(!client){
+      errBox.innerHTML = `<div class="auth-msg err">Не удалось подключиться к Supabase (проверьте интернет или правильность URL/ключа).</div>`;
+      return;
+    }
+    document.getElementById("backend-setup").classList.add("hidden");
+    await bootAuthFlow();
+  };
+}
+
+/* ============================================================
+   ЭКРАН «ВХОД / РЕГИСТРАЦИЯ ПО E-MAIL» (п.5.1 ТЗ).
+   Настоящая регистрация через Supabase Auth: signUp/signInWithPassword.
+   При регистрации Supabase по умолчанию отправляет письмо со ссылкой
+   для подтверждения на указанный e-mail — это не имитация, а реальное
+   письмо от сервиса.
+============================================================ */
+let authTab = "login"; // "login" | "signup"
+const EMAIL_RX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/* Базовая проверка сложности пароля — только для НОВОГО пароля при
+   регистрации (существующие логины не должны ломаться из-за задним
+   числом ужесточённых правил). Возвращает список того, чего не хватает. */
+function passwordIssues(pass){
+  const issues = [];
+  if(pass.length<8) issues.push("минимум 8 символов");
+  if(!/[a-zA-Zа-яА-ЯёЁ]/.test(pass)) issues.push("хотя бы одна буква");
+  if(!/[0-9]/.test(pass)) issues.push("хотя бы одна цифра");
+  return issues;
+}
+function passwordStrengthScore(pass){
+  if(!pass) return 0;
+  let score = 0;
+  if(pass.length>=8) score++;
+  if(pass.length>=12) score++;
+  if(/[a-zа-яё]/.test(pass) && /[A-ZА-ЯЁ]/.test(pass)) score++;
+  if(/[0-9]/.test(pass)) score++;
+  if(/[^a-zA-Zа-яА-ЯёЁ0-9]/.test(pass)) score++;
+  return Math.min(score, 4);
+}
+function renderPwStrength(pass){
+  const bar = document.getElementById("pw-strength-fill");
+  const label = document.getElementById("pw-strength-label");
+  if(!bar || !label) return;
+  const score = passwordStrengthScore(pass);
+  const steps = [
+    {w:"0%", c:"var(--border)", t:""},
+    {w:"25%", c:"var(--coral)", t:"Слабый пароль"},
+    {w:"50%", c:"var(--gold)", t:"Средний пароль"},
+    {w:"75%", c:"var(--teal)", t:"Хороший пароль"},
+    {w:"100%", c:"var(--teal)", t:"Отличный пароль"}
+  ][score];
+  bar.style.width = steps.w; bar.style.background = steps.c;
+  label.textContent = pass ? steps.t : "";
+}
+
+function renderAuthScreen(msg){
+  const root = document.getElementById("auth-content");
+  root.innerHTML = `
+    <div style="text-align:center;margin-bottom:6px;">${penguinSVG(90)}</div>
+    <h2 class="ob-title" style="text-align:center;">ИИ-репетитор</h2>
+    <div class="auth-tabs">
+      <button class="auth-tab ${authTab==='login'?'active':''}" data-tab="login">Войти</button>
+      <button class="auth-tab ${authTab==='signup'?'active':''}" data-tab="signup">Зарегистрироваться</button>
+    </div>
+    <div class="field">
+      <label>E-mail</label>
+      <div class="input-icon-wrap"><span class="input-icon">✉️</span>
+        <input type="email" id="auth-email" placeholder="you@example.com" autocomplete="email">
+      </div>
+    </div>
+    <div class="field">
+      <label>Пароль</label>
+      <div class="input-icon-wrap has-toggle"><span class="input-icon">🔒</span>
+        <input type="password" id="auth-pass" placeholder="${authTab==='signup'?'Минимум 8 символов, буквы и цифры':'Введите пароль'}" autocomplete="${authTab==='signup'?'new-password':'current-password'}">
+        <button type="button" class="pass-toggle" id="auth-pass-toggle" tabindex="-1" title="Показать/скрыть пароль">👁️</button>
+      </div>
+      ${authTab==='signup' ? `<div class="pw-strength-bar"><div id="pw-strength-fill"></div></div><div class="pw-strength-label" id="pw-strength-label"></div>` : ""}
+    </div>
+    <button class="btn btn-primary btn-block" id="auth-submit">${authTab==='login'?'Войти':'Зарегистрироваться'}</button>
+    <div id="auth-msg">${msg||""}</div>
+    ${authTab==='login' ? `<p style="text-align:center;font-size:12.5px;color:var(--muted);margin-top:14px;"><a href="#" id="auth-forgot" style="color:var(--ink);text-decoration:underline;">Забыли пароль?</a></p>` : ""}
+    <p style="text-align:center;font-size:11.5px;color:var(--muted);margin-top:18px;">Бэкенд: Supabase · <a href="#" id="auth-reconfigure" style="color:var(--ink);text-decoration:underline;">сменить проект</a></p>`;
+
+  root.querySelectorAll(".auth-tab").forEach(b=>{
+    b.onclick=()=>{ authTab = b.dataset.tab; renderAuthScreen(); };
+  });
+  document.getElementById("auth-submit").onclick=()=>doAuthSubmit();
+  const passInput = document.getElementById("auth-pass");
+  document.getElementById("auth-pass-toggle").onclick=()=>{
+    passInput.type = passInput.type==="password" ? "text" : "password";
+  };
+  if(authTab==="signup"){
+    passInput.addEventListener("input", ()=>renderPwStrength(passInput.value));
+  }
+  // Enter в любом из полей отправляет форму, как в обычной форме входа.
+  [document.getElementById("auth-email"), passInput].forEach(inp=>{
+    inp.addEventListener("keydown", (e)=>{ if(e.key==="Enter") doAuthSubmit(); });
+  });
+  const forgot = document.getElementById("auth-forgot");
+  if(forgot) forgot.onclick=(e)=>{ e.preventDefault(); doPasswordReset(); };
+  document.getElementById("auth-reconfigure").onclick=(e)=>{
+    e.preventDefault();
+    if(confirm("Сбросить настройки подключения к Supabase на этом устройстве?")){
+      localStorage.removeItem(SB_CONFIG_KEY);
+      location.reload();
+    }
+  };
+}
+async function doAuthSubmit(){
+  const emailInput = document.getElementById("auth-email");
+  const passInput = document.getElementById("auth-pass");
+  const email = emailInput.value.trim();
+  const pass = passInput.value;
+  const msgBox = document.getElementById("auth-msg");
+  emailInput.classList.remove("field-invalid");
+  passInput.classList.remove("field-invalid");
+
+  // Проверка заполненности и формата — до обращения к Supabase.
+  if(!email){
+    emailInput.classList.add("field-invalid");
+    msgBox.innerHTML = `<div class="auth-msg err">Введите e-mail.</div>`;
+    return;
+  }
+  if(!EMAIL_RX.test(email)){
+    emailInput.classList.add("field-invalid");
+    msgBox.innerHTML = `<div class="auth-msg err">Проверьте формат e-mail (например, you@example.com).</div>`;
+    return;
+  }
+  if(!pass){
+    passInput.classList.add("field-invalid");
+    msgBox.innerHTML = `<div class="auth-msg err">Введите пароль.</div>`;
+    return;
+  }
+  // Проверку сложности применяем только к НОВОМУ паролю при регистрации —
+  // для входа достаточно, чтобы поле было не пустым.
+  if(authTab==="signup"){
+    const issues = passwordIssues(pass);
+    if(issues.length){
+      passInput.classList.add("field-invalid");
+      msgBox.innerHTML = `<div class="auth-msg err">Пароль слишком простой — нужно: ${issues.join(", ")}.</div>`;
+      return;
+    }
+  }
+
+  msgBox.innerHTML = `<div class="auth-msg">Проверяем…</div>`;
+  try{
+    if(authTab==="signup"){
+      const { data, error } = await sbClient.auth.signUp({ email, password: pass });
+      if(error) throw error;
+      if(data && data.user && !data.session){
+        renderAuthScreen(`<div class="auth-msg ok">Письмо со ссылкой для подтверждения отправлено на ${escHtml(email)}. Перейдите по ссылке из письма, затем войдите на вкладке «Войти».</div>`);
+        authTab = "login";
+      }else if(data && data.session){
+        await afterLogin(data.session.user);
+      }
+    }else{
+      const { data, error } = await sbClient.auth.signInWithPassword({ email, password: pass });
+      if(error) throw error;
+      await afterLogin(data.user);
+    }
+  }catch(e){
+    msgBox.innerHTML = `<div class="auth-msg err">${escHtml(translateAuthError(e.message))}</div>`;
+  }
+}
+async function doPasswordReset(){
+  const email = document.getElementById("auth-email").value.trim();
+  const msgBox = document.getElementById("auth-msg");
+  if(!email){ msgBox.innerHTML = `<div class="auth-msg err">Сначала введите e-mail, на который выслать ссылку для сброса пароля.</div>`; return; }
+  try{
+    const { error } = await sbClient.auth.resetPasswordForEmail(email);
+    if(error) throw error;
+    msgBox.innerHTML = `<div class="auth-msg ok">Письмо для сброса пароля отправлено на ${escHtml(email)}.</div>`;
+  }catch(e){
+    msgBox.innerHTML = `<div class="auth-msg err">${escHtml(translateAuthError(e.message))}</div>`;
+  }
+}
+function translateAuthError(msg){
+  const m = (msg||"").toLowerCase();
+  if(m.includes("already registered") || m.includes("already exists")) return "Пользователь с таким e-mail уже зарегистрирован — попробуйте войти.";
+  if(m.includes("invalid login credentials")) return "Неверный e-mail или пароль.";
+  if(m.includes("email not confirmed")) return "Email ещё не подтверждён — перейдите по ссылке из письма.";
+  if(m.includes("password") && m.includes("6")) return "Пароль слишком короткий (минимум 6 символов).";
+  return msg || "Не удалось выполнить операцию — попробуйте ещё раз.";
+}
+
+/* Загрузка/слияние состояния после успешного входа: если у пользователя
+   уже есть сохранённые данные на сервере (п.5.1/5.9 ТЗ — профиль и прогресс
+   не теряются при смене устройства), подтягиваем их поверх локальных. */
+async function afterLogin(user){
+  document.getElementById("auth-screen").classList.add("hidden");
+  try{
+    const { data, error } = await sbClient.from("app_state").select("data").eq("user_id", user.id).maybeSingle();
+    if(error) throw error;
+    if(data && data.data){
+      state = Object.assign(defaultState(), data.data);
+    }
+  }catch(e){
+    console.error("Supabase: не удалось загрузить сохранённые данные —", e.message||e);
+  }
+  state.userId = user.id;
+  state.userEmail = user.email;
+  saveState();
+  if(state.onboardingDone){
+    document.getElementById("app").classList.remove("hidden");
+    renderApp();
+    maybeShowStudyReminder();
+  }else{
+    document.getElementById("onboarding").classList.remove("hidden");
+    renderOnboarding();
+  }
+}
+async function logout(){
+  try{ if(sbClient) await sbClient.auth.signOut(); }catch(e){ /* ignore */ }
+  location.reload();
+}
+
+/* Определяет, какой из трёх экранов показать при загрузке: настройка
+   бэкенда → вход/регистрация → онбординг/приложение. */
+async function bootAuthFlow(){
+  const cfg = loadSbConfig();
+  if(!cfg){
+    document.getElementById("backend-setup").classList.remove("hidden");
+    renderBackendSetup();
+    return;
+  }
+  if(!sbClient) initSupabaseClient();
+  if(!sbClient){
+    document.getElementById("backend-setup").classList.remove("hidden");
+    renderBackendSetup();
+    return;
+  }
+  try{
+    const { data:{ session } } = await sbClient.auth.getSession();
+    if(session && session.user){
+      await afterLogin(session.user);
+      return;
+    }
+  }catch(e){ console.error("Supabase: ошибка проверки сессии —", e.message||e); }
+  document.getElementById("auth-screen").classList.remove("hidden");
+  renderAuthScreen();
+}
+
+/* ============================================================
+   ONBOARDING FLOW
+   Порядок шагов зависит от выбора языка на шаге "profile" —
+   кыргызский/английский/оба (п.5.1 ТЗ). Для английского проходит
+   CEFR-тест (п.5.2), для кыргызского — самооценка по отдельной
+   шкале (п.5.2, KY_LEVELS выше).
+============================================================ */
+let obStage = "welcome";
+let obData = { name:"", age:"", goal:"", targetLangs:["en"], testAnswers:{} };
+function obPlan(){
+  const steps = ["welcome","profile"];
+  if(obData.targetLangs.includes("en")) steps.push("testintro","test");
+  if(obData.targetLangs.includes("ky")) steps.push("kylevel");
+  steps.push("result");
+  return steps;
+}
+function obGoNext(fromStage){
+  const plan = obPlan();
+  const idx = plan.indexOf(fromStage);
+  obStage = plan[idx+1] || "result";
+  renderOnboarding();
+}
+function obGoBack(fromStage){
+  const plan = obPlan();
+  const idx = plan.indexOf(fromStage);
+  obStage = idx>0 ? plan[idx-1] : "welcome";
+  renderOnboarding();
+}
+
+/* ============================================================
+   МАСКОТ — пингвин Mr. Penguin
+============================================================ */
+function penguinSVG(size){
+  size = size || 120;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="100" cy="205" rx="46" ry="8" fill="#000" opacity="0.15"/>
+    <ellipse cx="100" cy="120" rx="70" ry="88" fill="#16213E"/>
+    <ellipse cx="100" cy="138" rx="42" ry="62" fill="#F4F6F5"/>
+    <ellipse cx="65" cy="120" rx="16" ry="34" fill="#16213E" transform="rotate(-18 65 120)"/>
+    <ellipse cx="135" cy="120" rx="16" ry="34" fill="#16213E" transform="rotate(18 135 120)"/>
+    <circle cx="82" cy="90" r="8" fill="#fff"/>
+    <circle cx="118" cy="90" r="8" fill="#fff"/>
+    <circle cx="84" cy="92" r="4" fill="#16213E"/>
+    <circle cx="116" cy="92" r="4" fill="#16213E"/>
+    <path d="M92 102 L108 102 L100 114 Z" fill="#E3A22E"/>
+    <ellipse cx="78" cy="196" rx="13" ry="7" fill="#E3A22E"/>
+    <ellipse cx="122" cy="196" rx="13" ry="7" fill="#E3A22E"/>
+  </svg>`;
+}
+
+function renderOnboarding(){
+  const root = document.getElementById("ob-content");
+  const plan = obPlan(); // зависит от obData.targetLangs, пересчитывается каждый рендер
+  const stepIdx = plan.indexOf(obStage);
+  const totalSteps = plan.length - 2; // без welcome и result
+  const progress = `<div class="ob-progress">${plan.slice(0,-1).map((s,i)=>`<span class="${i<=stepIdx?'done':''}"></span>`).join("")}</div>`;
+  const stepLabel = `ШАГ ${Math.max(stepIdx,1)} ИЗ ${totalSteps}`;
+
+  if(obStage==="welcome"){
+    root.innerHTML = `
+      <div style="text-align:center;margin-bottom:6px;" class="animate-scale-in">${penguinSVG(110)}</div>
+      <div class="ob-step-label" style="text-align:center;">ДОБРО ПОЖАЛОВАТЬ</div>
+      <h2 class="ob-title" style="text-align:center;">ИИ-репетитор кыргызского и английского языков</h2>
+      <p class="ob-sub" style="text-align:center;">Пройдите короткую регистрацию и входной тест — и Mr. Penguin построит для вас индивидуальный план обучения.</p>
+      <div class="ob-actions"><span></span><button class="btn btn-primary" id="ob-next">Начать →</button></div>`;
+    document.getElementById("ob-next").onclick=()=>{ obStage="profile"; renderOnboarding(); };
+    return;
+  }
+
+  if(obStage==="profile"){
+    root.innerHTML = `
+      ${progress}
+      <div class="ob-step-label">${stepLabel}</div>
+      <h2 class="ob-title">Расскажите о себе</h2>
+      <div class="field"><label>Имя</label><input type="text" id="f-name" value="${obData.name}" placeholder="Например, Айгерим"></div>
+      <div class="field"><label>Возраст</label><input type="number" id="f-age" value="${obData.age}" placeholder="Например, 21"></div>
+      <div class="field"><label>Цель изучения языка</label>
+        <select id="f-goal">
+          <option value="travel">Разговорный язык для путешествий</option>
+          <option value="work">Язык для работы</option>
+          <option value="exam">Подготовка к экзамену</option>
+          <option value="general">Общее развитие</option>
+        </select>
+      </div>
+      <div class="field"><label>Какой язык изучаем?</label>
+        <div class="choice-row">
+          <button class="choice-pill ${obData.targetLangs.includes('en')?'selected':''}" data-lang="en">Английский</button>
+          <button class="choice-pill ${obData.targetLangs.includes('ky')?'selected':''}" data-lang="ky">Кыргызский (текст)</button>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-top:6px;">Можно выбрать оба языка сразу — переключаться между ними можно в любой момент.</p>
+      </div>
+      <div id="profile-step-err"></div>
+      <div class="ob-actions">
+        <button class="btn btn-ghost" id="ob-back">← Назад</button>
+        <button class="btn btn-primary" id="ob-next2">Далее →</button>
+      </div>`;
+    document.querySelectorAll(".choice-pill").forEach(p=>{
+      p.onclick=()=>{
+        const isSelected = p.classList.contains("selected");
+        if(isSelected){
+          const selectedCount = document.querySelectorAll(".choice-pill.selected").length;
+          if(selectedCount<=1){ toast("Выберите хотя бы один язык"); return; }
+        }
+        p.classList.toggle("selected");
+      };
+    });
+    document.getElementById("ob-back").onclick=()=>{ obStage="welcome"; renderOnboarding(); };
+    document.getElementById("ob-next2").onclick=()=>{
+      // Проверка заполненности профиля (п.5.1 ТЗ — имя, возраст обязательны).
+      const nameInput = document.getElementById("f-name");
+      const ageInput = document.getElementById("f-age");
+      const errBox = document.getElementById("profile-step-err");
+      nameInput.classList.remove("field-invalid"); ageInput.classList.remove("field-invalid");
+      const nameVal = nameInput.value.trim();
+      const ageVal = ageInput.value.trim();
+      const ageNum = parseInt(ageVal, 10);
+      if(!nameVal){
+        nameInput.classList.add("field-invalid");
+        errBox.innerHTML = `<div class="auth-msg err">Введите имя.</div>`;
+        return;
+      }
+      if(!ageVal || isNaN(ageNum) || ageNum<5 || ageNum>100){
+        ageInput.classList.add("field-invalid");
+        errBox.innerHTML = `<div class="auth-msg err">Введите корректный возраст (от 5 до 100 лет).</div>`;
+        return;
+      }
+      obData.name = nameVal;
+      obData.age = ageVal;
+      obData.goal = document.getElementById("f-goal").value;
+      const picked = [...document.querySelectorAll(".choice-pill.selected")].map(p=>p.dataset.lang);
+      obData.targetLangs = picked.length ? picked : ["en"];
+      obGoNext("profile");
+    };
+    return;
+  }
+
+  if(obStage==="testintro"){
+    root.innerHTML = `
+      ${progress}
+      <div class="ob-step-label">${stepLabel}</div>
+      <h2 class="ob-title">Входная диагностика (английский)</h2>
+      <p class="ob-sub">${ENTRY_TEST.length} коротких вопросов на грамматику, лексику, аудирование и чтение — определим ваш уровень по шкале CEFR (A1–C1). Либо начните «с нуля», если раньше английский не изучали.</p>
+      <div class="ob-actions">
+        <button class="btn" id="ob-scratch">Начинаю с нуля</button>
+        <button class="btn btn-primary" id="ob-starttest">Пройти тест →</button>
+      </div>`;
+    document.getElementById("ob-scratch").onclick=()=>{
+      // "Начинаю с нуля" должно пропускать сам тест (не просто перейти на
+      // следующий шаг плана, которым всегда является "test"), иначе тест
+      // сразу же перезапишет только что выбранный уровень A1.
+      state.level="A1"; state.levelSource="с нуля";
+      const plan = obPlan();
+      const testIdx = plan.indexOf("test");
+      obStage = testIdx>=0 ? (plan[testIdx+1] || "result") : (plan[plan.indexOf("testintro")+1] || "result");
+      renderOnboarding();
+    };
+    document.getElementById("ob-starttest").onclick=()=>{ obData.testAnswers={}; obData.testIdx=0; obStage="test"; renderOnboarding(); };
+    return;
+  }
+
+  if(obStage==="test"){
+    const i = obData.testIdx||0;
+    const q = ENTRY_TEST[i];
+    const bodyExtra = q.type==="reading"
+      ? `<div class="card" style="margin-bottom:14px;background:var(--card-solid);"><p style="margin:0;font-size:14px;line-height:1.6;">${q.passage}</p></div>`
+      : q.type==="listening"
+      ? `<button class="btn btn-primary btn-sm" id="test-speak-btn" data-text="${escAttr(q.audioText)}" style="margin-bottom:14px;">🔊 Прослушать фразу</button>`
+      : "";
+    root.innerHTML = `
+      <div class="ob-step-label">ВОПРОС ${i+1} ИЗ ${ENTRY_TEST.length}</div>
+      <div class="ob-progress">${ENTRY_TEST.map((_,idx)=>`<span class="${idx<i?'done':''}"></span>`).join("")}</div>
+      <div class="test-q">
+        <div class="test-q-meta">${q.type==="reading"?"Чтение":q.type==="listening"?"Аудирование":"Грамматика/лексика"} · уровень ориентировочно ${q.level}</div>
+        ${bodyExtra}
+        <div style="font-size:16px;font-weight:600;">${q.q}</div>
+        <div class="opt-list">${q.opts.map((o,oi)=>`<button class="opt-btn" data-oi="${oi}">${o}</button>`).join("")}</div>
+      </div>`;
+    const speakBtn = document.getElementById("test-speak-btn");
+    if(speakBtn) speakBtn.onclick = () => speak(speakBtn.dataset.text);
+    root.querySelectorAll(".opt-btn").forEach(b=>{
+      b.onclick=()=>{
+        obData.testAnswers[i] = parseInt(b.dataset.oi,10);
+        obData.testIdx = i+1;
+        if(obData.testIdx >= ENTRY_TEST.length){
+          let score=0;
+          ENTRY_TEST.forEach((qq,idx)=>{ if(obData.testAnswers[idx]===qq.a) score+=qq.w; });
+          state.entryScore = score;
+          state.level = levelFromScore(score);
+          state.levelSource = "тест";
+          obGoNext("test");
+        }else{
+          renderOnboarding();
+        }
+      };
+    });
+    return;
+  }
+
+  if(obStage==="kylevel"){
+    root.innerHTML = `
+      ${progress}
+      <div class="ob-step-label">${stepLabel}</div>
+      <h2 class="ob-title">Ваш уровень кыргызского</h2>
+      <p class="ob-sub">Отдельная шкала для кыргызского (полноценный тест — задача следующих этапов). Оцените себя честно — от этого зависит, с чего начнём.</p>
+      <div class="choice-row" style="flex-direction:column;align-items:stretch;">
+        ${KY_LEVELS.map(lv=>`<button class="choice-pill" data-action-ob="pick-ky-level" data-level="${lv.id}" style="text-align:left;">${lv.label}</button>`).join("")}
+      </div>
+      <div class="ob-actions"><button class="btn btn-ghost" id="ob-back-ky">← Назад</button><span></span></div>`;
+    root.querySelectorAll('[data-action-ob="pick-ky-level"]').forEach(b=>{
+      b.onclick=()=>{ state.kyLevel = b.dataset.level; obGoNext("kylevel"); };
+    });
+    document.getElementById("ob-back-ky").onclick=()=>{ obGoBack("kylevel"); };
+    return;
+  }
+
+  if(obStage==="result"){
+    const hasEn = obData.targetLangs.includes("en");
+    const hasKy = obData.targetLangs.includes("ky");
+    const weekly = hasEn ? (state.level==="A1"||state.level==="A2" ? 4 : 3) : (state.kyLevel==="none"||state.kyLevel==="basic" ? 4 : 3);
+    const levelLine = [
+      hasEn ? `английский: ${state.level}` : null,
+      hasKy ? `кыргызский: ${kyLevelLabel(state.kyLevel)}` : null
+    ].filter(Boolean).join(" · ");
+    root.innerHTML = `
+      ${progress}
+      <div class="ob-step-label">ГОТОВО</div>
+      <div class="result-badge">${hasEn ? state.level : "🇰🇬"}</div>
+      <h2 class="ob-title" style="text-align:center;">Ваш уровень: ${levelLine}</h2>
+      <p class="ob-sub" style="text-align:center;">${hasEn ? (state.levelSource==="тест" ? "Английский определён по результатам входного теста." : "Английский — вы начинаете с нуля, курс подобран для уровня A1.") : "План подобран под вашу самооценку по кыргызскому."}</p>
+      <div class="card" style="margin-bottom:18px;">
+        <b>Персональный план</b>
+        <p style="margin-top:8px;font-size:13.5px;color:var(--muted);">Цель: ${goalLabel(obData.goal)} · ${weekly} урока(ов) в неделю · языки: ${hasEn&&hasKy?"английский и кыргызский":hasEn?"английский":"кыргызский"}</p>
+      </div>
+      <button class="btn btn-primary btn-block" id="ob-finish">Начать обучение →</button>`;
+    document.getElementById("ob-finish").onclick=()=>{
+      state.profile.name = obData.name; state.profile.age = obData.age; state.profile.goal = obData.goal;
+      state.profile.targetLangs = obData.targetLangs.slice();
+      state.onboardingDone = true;
+      state.weeklyLessons = weekly;
+      markActivity(); saveState();
+      document.getElementById("onboarding").classList.add("hidden");
+      document.getElementById("app").classList.remove("hidden");
+      currentView="home"; renderApp();
+    };
+    return;
+  }
+}
+function goalLabel(g){
+  return {travel:"разговорный язык для путешествий", work:"язык для работы", exam:"подготовка к экзамену", general:"общее развитие"}[g] || "общее развитие";
+}
+
+/* ============================================================
+   APP NAV / ROUTER
+============================================================ */
+let currentView = "home";
+let ui = { lessonId:null, exIdx:0, exState:{}, reviewQueue:[], reviewIdx:0, flashRevealed:false, correctCount:0, xpEarned:0, lessonLangFilter:"en", adminTab:"content", miniTestIdx:0, miniTestCorrect:0, dialogueLangFilter:null, progressReportDays:7 };
+
+const NAV = [
+  {id:"home", icon:"🏠", key:"navHome"},
+  {id:"lessons", icon:"📘", key:"navLessons"},
+  {id:"dialogue", icon:"💬", key:"navDialogue"},
+  {id:"vocab", icon:"🗂️", key:"navVocab"},
+  {id:"progress", icon:"📈", key:"navProgress"},
+  {id:"profile", icon:"⚙️", key:"navProfile"},
+];
+
+function renderSidebar(){
+  // Пункт «Админ-панель» показывается только владельцу продукта — учётной
+  // записи с e-mail ADMIN_EMAIL (п.5.13 ТЗ) — разделение Ученик / Администратор.
+  const items = isAdminUser() ? NAV.concat([{id:"admin", icon:"🛠️", key:"navAdmin"}]) : NAV;
+  document.getElementById("navlist").innerHTML = items.map(n=>
+    `<button class="nav-item ${currentView===n.id?'active':''}" data-view="${n.id}"><span class="ico">${n.icon}</span>${t(n.key)}</button>`
+  ).join("");
+  document.querySelectorAll(".nav-item").forEach(b=>b.onclick=()=>{currentView=b.dataset.view; ui.lessonId=null; renderApp();});
+  document.getElementById("side-xp").textContent = state.xp;
+  document.getElementById("side-streak").textContent = state.streak.count;
+}
+
+function renderApp(){
+  renderSidebar();
+  const main = document.getElementById("main-content");
+  if(currentView==="home") main.innerHTML = viewHome();
+  else if(currentView==="lessons") main.innerHTML = ui.lessonId ? viewLessonDetail() : viewLessons();
+  else if(currentView==="dialogue") main.innerHTML = viewDialogue();
+  else if(currentView==="vocab") main.innerHTML = viewVocab();
+  else if(currentView==="progress") main.innerHTML = viewProgress();
+  else if(currentView==="profile") main.innerHTML = viewProfile();
+  else if(currentView==="admin") main.innerHTML = isAdminUser() ? viewAdmin() : (currentView="home", viewHome());
+  bindViewEvents();
+  saveState();
+}
+
+/* ---------- HOME ---------- */
+function viewHome(){
+  // Основной трек на главной определяется выбором пользователя при
+  // регистрации (кыргызский/английский/оба — п.5.1 ТЗ): если выбран
+  // английский (в т.ч. вместе с кыргызским), карточка "продолжить
+  // обучение" ведёт по нему; если выбран только кыргызский — по нему.
+  const targetLangs = (state.profile.targetLangs && state.profile.targetLangs.length) ? state.profile.targetLangs : ["en"];
+  const showEn = targetLangs.includes("en");
+  const showKy = targetLangs.includes("ky");
+  const primaryLang = showEn ? "en" : "ky";
+  const primaryPool = primaryLang==="en" ? EN_LESSONS : KY_LESSONS;
+  const next = primaryPool.find(l=>!isLessonHidden(l.id) && !(state.lessonsProgress[l.id]&&state.lessonsProgress[l.id].status==="done"));
+  const doneCount = Object.values(state.lessonsProgress).filter(l=>l.status==="done").length;
+  const enDone = EN_LESSONS.filter(l=>state.lessonsProgress[l.id]&&state.lessonsProgress[l.id].status==="done").length;
+  const kyDone = KY_LESSONS.filter(l=>state.lessonsProgress[l.id]&&state.lessonsProgress[l.id].status==="done").length;
+  const due = state.vocab.filter(v=>v.nextReview<=todayStr()).length;
+  const levelDisplay = showEn ? state.level : kyLevelLabel(state.kyLevel);
+  // Карточка "второго" языка построена по той же логике и с той же кнопкой
+  // ("Начать урок →", btn-primary, ведёт сразу в конкретный урок), что и
+  // карточка "ПРОДОЛЖИТЬ ОБУЧЕНИЕ" выше — оба языка получают одинаковое
+  // приглашение приступить к занятиям, независимо от того, какой из них
+  // выбран основным треком.
+  const otherLang = primaryLang==="en" ? "ky" : "en";
+  const otherPool = otherLang==="en" ? EN_LESSONS : KY_LESSONS;
+  const otherDone = otherLang==="en" ? enDone : kyDone;
+  const otherNext = otherPool.find(l=>!isLessonHidden(l.id) && !(state.lessonsProgress[l.id]&&state.lessonsProgress[l.id].status==="done"));
+  const otherTitle = otherLang==="en" ? "Английский язык" : "Кыргызский язык — текстовый старт";
+  const otherMeta = otherLang==="en" ? `CEFR ${state.level||"—"}` : `уровень: ${kyLevelLabel(state.kyLevel)} · пока без озвучки`;
+  const otherEyebrow = otherLang==="en" ? (showEn?"АНГЛИЙСКИЙ":"НОВОЕ") : (showKy?"КЫРГЫЗСКИЙ":"НОВОЕ");
+  const otherStartBtn = otherNext
+    ? `<button class="btn btn-primary" data-action="open-lesson" data-id="${otherNext.id}">Начать урок →</button>`
+    : `<span class="badge badge-done">✓ пройдено</span>`;
+  const otherLangCard = `<div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+        <div><div class="eyebrow">${otherEyebrow}</div><h3>${otherTitle}</h3><p style="color:var(--muted);font-size:13.5px;">${otherDone}/${otherPool.length} уроков · ${otherMeta}</p></div>
+        ${otherStartBtn}
+      </div>`;
+  return `
+    <div class="page-head" style="display:flex;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap;">
+      <div><div class="eyebrow">ГЛАВНАЯ</div><h1>Привет, ${state.profile.name || "друг"}! 👋</h1><p style="color:var(--muted)">Уровень ${levelDisplay} · цель — ${goalLabel(state.profile.goal)} · план: ${state.weeklyLessons||4} урок(ов)/нед.</p></div>
+      <div style="flex:none;">${penguinSVG(72)}</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-chip"><div class="num">${doneCount}/${LESSONS.length}</div><div class="lbl">уроков пройдено</div></div>
+      <div class="stat-chip"><div class="num">${state.xp}</div><div class="lbl">очков опыта</div></div>
+      <div class="stat-chip"><div class="num">${state.streak.count}</div><div class="lbl">${t('streakUnit')}</div></div>
+      <div class="stat-chip"><div class="num">${state.vocab.length}</div><div class="lbl">слов в словаре</div></div>
+    </div>
+    ${next ? `
+    <div class="card">
+      <div class="eyebrow">ПРОДОЛЖИТЬ ОБУЧЕНИЕ</div>
+      <h3>${next.title}</h3>
+      <p style="color:var(--muted);font-size:13.5px;">Уровень ${next.level} · ${next.exercises.length} упражнений</p>
+      <button class="btn btn-primary" data-action="open-lesson" data-id="${next.id}">Начать урок →</button>
+    </div>` : `<div class="card"><b>Уроки ${primaryLang==="en"?"английского":"кыргызского"} пройдены 🎉</b><p style="color:var(--muted);font-size:13.5px;">Новые уроки появятся здесь позже.</p></div>`}
+    ${otherLangCard}
+    ${due>0 ? `<div class="card"><div class="eyebrow">СЛОВАРЬ</div><h3>${due} слов(а) ждут повторения</h3><button class="btn" data-action="goto" data-view="vocab">Повторить сейчас →</button></div>` : ""}
+    <div class="card">
+      <div class="eyebrow">ЗНАЧКИ</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+        ${badgeChip("first_lesson","Первый урок")}${badgeChip("streak3","Серия 3 дня")}${badgeChip("streak7","Серия 7 дней")}${badgeChip("vocab20","20 слов")}${badgeChip("first_dialogue","Первый диалог с ИИ")}
+      </div>
+    </div>`;
+}
+function badgeChip(id,label){
+  const on = state.badges.includes(id);
+  return `<span class="badge ${on?'badge-done':'badge-progress'}">${on?'✓ ':''}${label}</span>`;
+}
+
+/* ---------- LESSONS LIST ---------- */
+function isLessonHidden(id){ return state.contentOverrides.hiddenLessons.includes(id); }
+function viewLessons(){
+  const lang = ui.lessonLangFilter || "en";
+  const full = lang==="en" ? EN_LESSONS : KY_LESSONS;
+  // Ученику скрытые администратором уроки не показываются вовсе;
+  // администратор видит их с пометкой (управляются в Админ-панели, вкладка «Контент»).
+  const list = isAdminUser() ? full : full.filter(l=>!isLessonHidden(l.id));
+  return `
+    <div class="page-head"><div class="eyebrow">${t('navLessons').toUpperCase()}</div><h1>Уроки</h1></div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button class="btn btn-sm ${lang==='en'?'btn-primary':''}" data-action="set-lesson-lang" data-lang="en">Английский</button>
+      <button class="btn btn-sm ${lang==='ky'?'btn-primary':''}" data-action="set-lesson-lang" data-lang="ky">Кыргызча (текст)</button>
+    </div>
+    ${lang==="ky" ? `<div class="card" style="background:var(--gold-soft);border-color:var(--gold);margin-bottom:14px;"><p style="margin:0;font-size:13px;color:var(--on-gold-soft);">Пока без озвучки: голосовые технологии для кыргызского ещё в разработке. Материал базовый и будет дополняться.</p></div>` : ""}
+    ${lang==="ky" ? `<div class="card" style="margin-bottom:14px;">
+      <div class="eyebrow">ВАШ УРОВЕНЬ КЫРГЫЗСКОГО</div>
+      <div class="choice-row" style="margin-top:8px;">
+        ${KY_LEVELS.map(lv=>`<button class="choice-pill ${state.kyLevel===lv.id?'selected':''}" data-action="set-ky-level" data-level="${lv.id}">${lv.label}</button>`).join("")}
+      </div>
+    </div>` : ""}
+    <div class="card" style="padding:8px;">
+      ${list.map(l=>{
+        const prog = state.lessonsProgress[l.id];
+        const status = prog ? prog.status : "not_started";
+        const badge = status==="done" ? `<span class="badge badge-done">✓ пройдено · ${prog.bestScore}%</span>` : status==="in_progress" ? `<span class="badge badge-progress">в процессе</span>` : `<span class="badge badge-level">${l.level}</span>`;
+        const hiddenTag = isLessonHidden(l.id) ? ` <span class="badge" style="background:var(--coral-soft);color:var(--on-coral-soft);">скрыт админом</span>` : "";
+        return `<div class="lesson-card" style="border-bottom:1px solid var(--border);">
+          <div><h3>${l.title}${hiddenTag}</h3><p>${l.exercises.length} упражнений</p></div>
+          <div style="display:flex;align-items:center;gap:10px;">${badge}<button class="btn btn-sm" data-action="open-lesson" data-id="${l.id}">${status==="done"?"Повторить":"Открыть"}</button></div>
+        </div>`;
+      }).join("")}
+    </div>`;
+}
+
+/* ---------- LESSON DETAIL / EXERCISE ENGINE ---------- */
+function viewLessonDetail(){
+  const lesson = LESSONS.find(l=>l.id===ui.lessonId);
+  if(!lesson) return viewLessons();
+  const hasMiniTest = lesson.miniTest && lesson.miniTest.length;
+  if(ui.exIdx >= lesson.exercises.length){
+    if(hasMiniTest && (ui.miniTestIdx||0) < lesson.miniTest.length) return viewMiniTest(lesson);
+    return viewLessonSummary(lesson);
+  }
+  const ex = lesson.exercises[ui.exIdx];
+  const es = ui.exState;
+  const progressPct = Math.round((ui.exIdx/lesson.exercises.length)*100);
+
+  let bodyHtml = "";
+  if(ui.exIdx===0 && !es.introShown){
+    const audioBtn = x => lesson.lang!=="ky" ? ` <button class="btn btn-sm btn-ghost" data-action="speak" data-text="${escAttr(x)}">🔊</button>` : "";
+    bodyHtml += `<div class="card"><div class="eyebrow">ОБЪЯСНЕНИЕ</div><p>${lesson.explain}</p>
+      <div class="eyebrow" style="margin-top:10px;">ПРИМЕРЫ</div>
+      <ul style="margin:6px 0 0;padding-left:18px;">${lesson.examples.map(x=>`<li>${x}${audioBtn(x)}</li>`).join("")}</ul>
+    </div>`;
+  }
+
+  bodyHtml += `<div class="card exercise-box">
+    <div class="eyebrow">УПРАЖНЕНИЕ ${ui.exIdx+1} ИЗ ${lesson.exercises.length}</div>
+    ${renderExercise(ex, es)}
+    <div id="ex-feedback"></div>
+  </div>`;
+
+  return `
+    <div class="page-head">
+      <button class="btn btn-ghost btn-sm" data-action="goto" data-view="lessons">← К списку уроков</button>
+      <h1 style="margin-top:10px;">${lesson.title}</h1>
+      <div class="progress-track"><div class="progress-fill" style="width:${progressPct}%"></div></div>
+    </div>
+    ${bodyHtml}`;
+}
+
+/* Мини-тест в конце урока для закрепления (п.5.4 ТЗ) — короткая проверка
+   (2-3 вопроса) после основных упражнений, отдельная от них по счёту и по
+   смыслу: упражнения учат по ходу урока, мини-тест проверяет, что материал
+   закрепился, и не даёт подсказок/AI-кнопок, как обычные упражнения. */
+function viewMiniTest(lesson){
+  const i = ui.miniTestIdx||0;
+  const q = lesson.miniTest[i];
+  const progressPct = Math.round(((lesson.exercises.length+i)/(lesson.exercises.length+lesson.miniTest.length))*100);
+  return `
+    <div class="page-head">
+      <button class="btn btn-ghost btn-sm" data-action="goto" data-view="lessons">← К списку уроков</button>
+      <h1 style="margin-top:10px;">${lesson.title}</h1>
+      <div class="progress-track"><div class="progress-fill" style="width:${progressPct}%"></div></div>
+    </div>
+    <div class="card exercise-box">
+      <div class="eyebrow">МИНИ-ТЕСТ ДЛЯ ЗАКРЕПЛЕНИЯ · ВОПРОС ${i+1} ИЗ ${lesson.miniTest.length}</div>
+      <p style="font-size:16px;font-weight:600;">${q.q}</p>
+      <div class="opt-list">${q.opts.map((o,oi)=>`<button class="opt-btn" data-action="minitest-pick" data-i="${oi}">${o}</button>`).join("")}</div>
+      <div id="ex-feedback"></div>
+    </div>`;
+}
+
+function renderExercise(ex, es){
+  if(ex.type==="mcq"){
+    return `<p style="font-size:16px;font-weight:600;">${ex.q}</p>
+      <div class="opt-list">${ex.opts.map((o,i)=>`<button class="opt-btn" data-action="mcq-pick" data-i="${i}">${o}</button>`).join("")}</div>`;
+  }
+  if(ex.type==="fill"){
+    const parts = ex.sentence.split("___");
+    return `<p class="fill-line">${parts[0]}<input class="fill-input" id="fill-input" placeholder="...">${parts[1]||""}</p>
+      <button class="btn btn-primary btn-sm" data-action="check-fill" style="margin-top:10px;">Проверить</button>`;
+  }
+  if(ex.type==="translate"){
+    return `<p style="font-weight:600;">${ex.prompt}</p>
+      <input type="text" id="tr-input" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:9px;background:var(--card-solid);color:var(--ink);" placeholder="Введите перевод на английском">
+      <button class="btn btn-primary btn-sm" data-action="check-translate" style="margin-top:10px;">Проверить</button>`;
+  }
+  if(ex.type==="match"){
+    if(!es.matchLeftSel) es.matchLeftSel=null;
+    if(!es.pairs) es.pairs={};
+    const left = ex.pairs.map(p=>p[0]);
+    const rightShuffled = es.rightOrder || (es.rightOrder = shuffle(ex.pairs.map(p=>p[1])));
+    return `<p style="font-weight:600;">Сопоставьте пары (перетащите слева направо — или нажмите слева, затем справа)</p>
+      <div class="match-cols">
+        <div class="match-col">${left.map((l,i)=>`<div class="match-item ${es.pairs[i]!==undefined?'paired':(es.matchLeftSel===i?'sel':'')}" data-action="match-left" data-i="${i}" draggable="true">${l}</div>`).join("")}</div>
+        <div class="match-col">${rightShuffled.map((r,ri)=>`<div class="match-item ${Object.values(es.pairs).includes(ri)?'paired':''}" data-action="match-right" data-ri="${ri}">${r}</div>`).join("")}</div>
+      </div>
+      <button class="btn btn-primary btn-sm" data-action="check-match" style="margin-top:12px;">Проверить</button>`;
+  }
+  if(ex.type==="pronounce"){
+    const hasSR = ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+    return `<p style="font-size:14px;color:var(--muted);">Проверка произношения</p>
+      <p style="font-size:20px;font-weight:700;margin:6px 0 14px;">«${ex.phrase}»</p>
+      ${hasSR ? `<button class="btn btn-primary btn-sm" data-action="pronounce-record">🎙️ Записать голосом</button>` : `<p style="font-size:12.5px;color:var(--muted);">Микрофон-распознавание не поддерживается в этом браузере — введите фразу текстом ниже.</p>`}
+      <div style="margin-top:10px;display:flex;gap:8px;">
+        <input type="text" id="pronounce-input" placeholder="${hasSR?'или впишите то, что сказали, текстом':'введите фразу текстом'}" style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:9px;background:var(--card-solid);color:var(--ink);">
+        <button class="btn btn-primary btn-sm" data-action="pronounce-check">Проверить</button>
+      </div>`;
+  }
+  if(ex.type==="listen"){
+    return `<p style="font-size:14px;color:var(--muted);">Аудирование — прослушайте фразу и ответьте на вопрос</p>
+      <button class="btn btn-primary btn-sm" data-action="speak" data-text="${escAttr(ex.audioText)}" style="margin:4px 0 16px;">🔊 Прослушать фразу</button>
+      <p style="font-weight:600;">${ex.question}</p>
+      <div class="opt-list">${ex.opts.map((o,i)=>`<button class="opt-btn" data-action="mcq-pick" data-i="${i}">${o}</button>`).join("")}</div>`;
+  }
+  if(ex.type==="reading"){
+    return `<p style="font-size:14px;color:var(--muted);">Чтение — прочитайте текст и ответьте на вопрос</p>
+      <div class="card" style="margin:6px 0 14px;background:var(--card-solid);"><p style="margin:0;font-size:14px;line-height:1.6;">${ex.passage}</p></div>
+      <p style="font-weight:600;">${ex.q}</p>
+      <div class="opt-list">${ex.opts.map((o,i)=>`<button class="opt-btn" data-action="mcq-pick" data-i="${i}">${o}</button>`).join("")}</div>`;
+  }
+  return "";
+}
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function escAttr(s){ return String(s).replace(/"/g,"&quot;"); }
+function escHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+/* ============================================================
+   МОДЕРАЦИЯ ДИАЛОГОВ С ИИ (п.5.13 ТЗ) — простая клиентская
+   эвристика по ключевым словам/паттернам. Ничего не блокирует
+   в диалоге ученика (чат остаётся живым), а лишь тихо ставит
+   сообщение в очередь на просмотр администратором/методистом.
+============================================================ */
+const MODERATION_RULES = [
+  {category:"грубость", rx:/\b(идиот|тупой|дурак|stupid|idiot|dumb)\b/i},
+  {category:"личные данные", rx:/\b(пароль|password|номер карты|credit card|cvv)\b/i},
+  {category:"вне темы обучения", rx:/\b(наркотик|оружие|drugs|weapon)\b/i},
+];
+function newMsgId(){ return "d"+Date.now()+Math.random().toString(36).slice(2,7); }
+function moderateText(text, msgId){
+  for(const rule of MODERATION_RULES){
+    if(rule.rx.test(text)){
+      state.moderationLog.push({
+        id:"m"+Date.now()+Math.random().toString(36).slice(2,7),
+        ts:new Date().toISOString(), msgId, text, category:rule.category, status:"pending"
+      });
+      break; // одной записи на сообщение достаточно для демо
+    }
+  }
+}
+function norm(s){ return s.toLowerCase().trim().replace(/[.!?']/g,""); }
+// Разбор произнесённой фразы по словам эталона (п.5.6 ТЗ): для каждого
+// слова эталонной фразы отмечает, было ли оно найдено в распознанном
+// тексте — это даёт материал для визуальной обратной связи "что именно
+// произнесено неверно", а не только общий процент совпадения.
+function wordMatchDetail(target, said){
+  const words = s => s.toLowerCase().replace(/[^\w\s]/g,"").split(/\s+/).filter(Boolean);
+  const t = words(target), sArr = words(said);
+  const pool = sArr.slice();
+  return t.map(w=>{
+    const idx = pool.indexOf(w);
+    const ok = idx>-1;
+    if(ok) pool.splice(idx,1);
+    return {word:w, ok};
+  });
+}
+function wordMatchScore(target, said){
+  const detail = wordMatchDetail(target, said);
+  if(!detail.length) return 0;
+  return detail.filter(d=>d.ok).length / detail.length;
+}
+// Цветные "чипы" по словам эталонной фразы: зелёный — слово распознано в
+// сказанном, красный — не распознано (эталонные слова безопасны для
+// innerHTML — это фиксированный контент урока, а не ввод пользователя).
+function pronounceFeedbackHtml(target, said){
+  const detail = wordMatchDetail(target, said);
+  return `<div class="pron-detail">${detail.map(d=>`<span class="pron-chip ${d.ok?'pron-ok':'pron-bad'}">${escHtml(d.word)}</span>`).join(" ")}</div>`;
+}
+// Общая логика сопоставления пары (правая колонка): вызывается как кликом
+// по правому элементу, так и перетаскиванием (drag-and-drop, п.5.7 ТЗ) —
+// оба способа ведут к одному и тому же состоянию.
+function pairMatchRight(ri){
+  if(ui.exState.matchLeftSel!=null){
+    ui.exState.pairs[ui.exState.matchLeftSel] = ri;
+    ui.exState.matchLeftSel = null;
+  }
+  renderApp();
+}
+
+function viewLessonSummary(lesson){
+  const total = lesson.exercises.length;
+  const correct = ui.correctCount || 0;
+  const pct = Math.round((correct/total)*100);
+  // Текстовый диалог с ИИ доступен на обоих языках (п.5.5 ТЗ) — только голос
+  // ограничен английским (речевые технологии для кыргызского требуют
+  // отдельного R&D, см. раздел 8 ТЗ), поэтому кнопка есть у уроков любого
+  // языка, но передаёт язык урока, чтобы диалог открылся на нужном языке.
+  const dialogueBtn = `<button class="btn btn-primary" data-action="dialogue-from-lesson" data-topic="${escAttr(lesson.title)}" data-lang="${lesson.lang}">Практика диалога по теме →</button>`;
+  const hasMiniTest = lesson.miniTest && lesson.miniTest.length;
+  const miniTestLine = hasMiniTest
+    ? `<p style="color:var(--muted);margin-top:2px;">Мини-тест на закрепление: ${ui.miniTestCorrect||0} из ${lesson.miniTest.length} верно</p>`
+    : "";
+  return `
+    <div class="page-head"><h1>Урок завершён 🎉</h1></div>
+    <div class="card" style="text-align:center;">
+      <div class="result-badge" style="background:var(--teal-soft);color:var(--teal);">${pct}%</div>
+      <h2>${correct} из ${total} правильно</h2>
+      ${miniTestLine}
+      <p style="color:var(--muted);">+${ui.xpEarned||0} XP получено за этот урок</p>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;">
+        <button class="btn btn-ghost btn-sm" data-action="goto" data-view="lessons">← К списку уроков</button>
+        ${dialogueBtn}
+      </div>
+    </div>`;
+}
+
+/* Итог урока (прогресс/лучший результат/XP/бейджи) фиксируется один раз —
+   после основных упражнений, если у урока нет мини-теста, либо после
+   мини-теста на закрепление (п.5.4 ТЗ), если он есть. */
+function finalizeLessonCompletion(lesson){
+  const total = lesson.exercises.length;
+  const pct = Math.round(((ui.correctCount||0)/total)*100);
+  const prev = state.lessonsProgress[lesson.id] || {attempts:0, bestScore:0};
+  state.lessonsProgress[lesson.id] = {
+    status:"done",
+    bestScore: Math.max(prev.bestScore||0, pct),
+    attempts: (prev.attempts||0) + 1,
+    lastCompletedAt: todayStr() // для еженедельного/месячного отчёта (п.5.9 ТЗ)
+  };
+  ui.xpEarned = (ui.xpEarned||0) + 30;
+  addXP(30);
+  checkBadges(); saveState();
+}
+
+/* ---------- exercise interaction handlers ---------- */
+function finalizeExercise(lesson, correct, explainText, exObj){
+  ui.correctCount = (ui.correctCount||0) + (correct?1:0);
+  const gained = correct?10:2;
+  ui.xpEarned = (ui.xpEarned||0) + gained;
+  const fb = document.getElementById("ex-feedback");
+  addXP(gained);
+  recordSkillAttempt(exObj&&exObj.type, correct);
+  if(!correct){
+    state.errorsLog.push({lessonId:lesson.id, exType:(exObj&&exObj.type)||"unknown", date:todayStr()});
+  }
+  fb.innerHTML = `<div class="feedback-box ${correct?'feedback-ok':'feedback-bad'}">
+      <b>${correct?"Верно!":"Не совсем."}</b> ${explainText||""}
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-sm" data-action="ai-explain" data-ex-explain="${escAttr(explainText||"")}">✨ Объяснить иначе (ИИ)</button>
+        <button class="btn btn-sm" data-action="ai-example" data-topic="${escAttr(lesson.title)}">✨ Ещё пример (ИИ)</button>
+        <button class="btn btn-sm btn-primary" data-action="next-exercise" style="margin-left:auto;">Далее →</button>
+      </div>
+      <div class="ai-inline hidden" id="ai-extra"></div>
+    </div>`;
+}
+
+// Единый делегированный обработчик кликов — вешается ОДИН раз на document.
+// Это важно: часть кнопок (например "Далее", "Объяснить иначе") добавляется в DOM
+// напрямую через innerHTML уже ПОСЛЕ полного рендера (см. finalizeExercise), поэтому
+// точечная привязка onclick к каждому найденному элементу их бы не поймала.
+async function handleDataAction(elm){
+      const a = elm.dataset.action;
+      if(a==="goto"){ currentView = elm.dataset.view; ui.lessonId=null; renderApp(); return; }
+      if(a==="logout"){ if(confirm("Выйти из аккаунта?")) logout(); return; }
+      if(a==="goto-lessons-lang"){ currentView="lessons"; ui.lessonId=null; ui.lessonLangFilter = elm.dataset.lang||"en"; renderApp(); return; }
+      if(a==="set-lesson-lang"){ ui.lessonLangFilter = elm.dataset.lang||"en"; renderApp(); return; }
+      if(a==="set-ky-level"){ state.kyLevel = elm.dataset.level; saveState(); toast("Уровень кыргызского сохранён: " + kyLevelLabel(state.kyLevel)); renderApp(); return; }
+      if(a==="open-lesson"){
+        if(!isAdminUser() && isLessonHidden(elm.dataset.id)){ toast("Урок временно недоступен"); return; }
+        // currentView должен переключаться на "lessons" явно: эта кнопка также
+        // встречается на Главной и в Прогрессе (история ошибок → "Повторить
+        // урок"), где currentView ещё не "lessons" — без этой строки урок
+        // молча не открывался бы с тех экранов.
+        currentView = "lessons";
+        ui.lessonId = elm.dataset.id; ui.exIdx=0; ui.exState={}; ui.correctCount=0; ui.xpEarned=0; ui.miniTestIdx=0; ui.miniTestCorrect=0;
+        const openedLesson = LESSONS.find(l=>l.id===ui.lessonId);
+        if(openedLesson) ui.lessonLangFilter = openedLesson.lang;
+        if(!state.lessonsProgress[ui.lessonId]) state.lessonsProgress[ui.lessonId] = {status:"in_progress", attempts:0, bestScore:0};
+        else if(state.lessonsProgress[ui.lessonId].status!=="done") state.lessonsProgress[ui.lessonId].status="in_progress";
+        saveState(); renderApp(); return;
+      }
+      if(a==="admin-tab"){ ui.adminTab = elm.dataset.tab; renderApp(); return; }
+      if(a==="admin-toggle-lesson"){
+        if(!isAdminUser()) return;
+        const id = elm.dataset.id;
+        const idx = state.contentOverrides.hiddenLessons.indexOf(id);
+        if(idx>=0) state.contentOverrides.hiddenLessons.splice(idx,1);
+        else state.contentOverrides.hiddenLessons.push(id);
+        saveState(); renderApp(); return;
+      }
+      if(a==="admin-resolve-flag"){
+        if(!isAdminUser()) return;
+        const entry = state.moderationLog.find(f=>f.id===elm.dataset.id);
+        if(entry) entry.status = "reviewed";
+        saveState(); renderApp(); return;
+      }
+      if(a==="admin-remove-msg"){
+        if(!isAdminUser()) return;
+        const entry = state.moderationLog.find(f=>f.id===elm.dataset.id);
+        if(entry){
+          // Ищем сообщение по стабильному id, а не по индексу массива: индексы
+          // сдвигаются при обрезке истории диалога до последних 16 сообщений
+          // (см. sendChatMessage), а id остаётся верным всегда.
+          // entry.msgId может отсутствовать у флагов, сохранённых более старой
+          // версией схемы (до перехода на стабильные id) — тогда не пытаемся
+          // искать по id вовсе, иначе undefined===undefined совпал бы с первым
+          // же сообщением без id и стёр бы не то сообщение.
+          const msg = entry.msgId ? state.dialogue.find(m=>m.id===entry.msgId) : null;
+          if(msg && msg.content===entry.text){
+            msg.content = "[сообщение удалено модератором]";
+            entry.status = "removed";
+          }else{
+            entry.status = "removed"; // сообщение уже выпало из окна истории — просто закрываем флаг
+            toast("Сообщение уже не хранится в истории диалога (окно 16 сообщений) — флаг закрыт");
+            saveState(); renderApp(); return;
+          }
+        }
+        saveState(); renderApp(); toast("Сообщение удалено из истории диалога"); return;
+      }
+      if(a==="speak"){ speak(elm.dataset.text); return; }
+      if(a==="speak-dialogue-msg"){
+        const idx = parseInt(elm.dataset.idx,10);
+        const msg = state.dialogue[idx];
+        if(msg) speak(msg.content);
+        return;
+      }
+      // Должно обрабатываться ДО проверки "const lesson = ...; if(!lesson)
+      // return;" ниже: к моменту переключения языка диалога ui.lessonId уже
+      // очищен (диалог открыт не из карточки урока), и без этой строки
+      // переключатель "Английский/Кыргызча" в Диалоге молча не срабатывал бы.
+      if(a==="set-dialogue-lang"){ ui.dialogueLangFilter = elm.dataset.lang==="ky" ? "ky" : "en"; renderApp(); return; }
+      if(a==="set-report-range"){ ui.progressReportDays = parseInt(elm.dataset.days,10)===30 ? 30 : 7; renderApp(); return; }
+
+      const lesson = LESSONS.find(l=>l.id===ui.lessonId);
+      if(!lesson) return;
+      const ex = lesson.exercises[ui.exIdx];
+
+      if(a==="mcq-pick"){
+        const i = parseInt(elm.dataset.i,10);
+        document.querySelectorAll(".opt-btn").forEach(b=>b.disabled=true);
+        elm.classList.add(i===ex.a?"correct":"wrong");
+        if(i!==ex.a) document.querySelectorAll(".opt-btn")[ex.a].classList.add("correct");
+        finalizeExercise(lesson, i===ex.a, ex.explain, ex);
+      }
+      if(a==="check-fill"){
+        const val = norm(document.getElementById("fill-input").value);
+        const ok = ex.answers.map(norm).includes(val);
+        finalizeExercise(lesson, ok, ex.explain + (ok?"":` Правильный ответ: «${ex.answers[0]}».`), ex);
+      }
+      if(a==="check-translate"){
+        const val = norm(document.getElementById("tr-input").value);
+        const ok = ex.answers.map(norm).includes(val);
+        finalizeExercise(lesson, ok, ex.explain + (ok?"":` Пример: «${ex.answers[0]}».`), ex);
+      }
+      if(a==="match-left"){ ui.exState.matchLeftSel = parseInt(elm.dataset.i,10); renderApp(); return; }
+      if(a==="match-right"){ pairMatchRight(parseInt(elm.dataset.ri,10)); return; }
+      if(a==="check-match"){
+        const rightOrder = ui.exState.rightOrder;
+        let allCorrect = true;
+        ex.pairs.forEach((p,i)=>{
+          const chosenRi = ui.exState.pairs[i];
+          if(chosenRi===undefined || rightOrder[chosenRi]!==p[1]) allCorrect=false;
+        });
+        finalizeExercise(lesson, allCorrect, allCorrect?"Все пары верны.":"Некоторые пары неверны — сверьтесь с объяснением урока.", ex);
+      }
+      if(a==="pronounce-record"){
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if(!SR){ toast("Распознавание речи недоступно в этом браузере"); return; }
+        const inputEl = document.getElementById("pronounce-input");
+        elm.disabled = true; elm.textContent = "🔴 Слушаю…";
+        const rec = new SR();
+        rec.lang = "en-US"; rec.interimResults = false; rec.maxAlternatives = 1;
+        rec.onresult = (e)=>{ if(inputEl) inputEl.value = e.results[0][0].transcript; };
+        rec.onerror = ()=>{ toast("Не удалось распознать речь — попробуйте ещё раз или введите текстом"); };
+        rec.onend = ()=>{ elm.disabled = false; elm.textContent = "🎙️ Записать голосом"; };
+        try{ rec.start(); }catch(err){ elm.disabled=false; elm.textContent="🎙️ Записать голосом"; }
+      }
+      if(a==="pronounce-check"){
+        const said = (document.getElementById("pronounce-input")||{}).value || "";
+        if(!said.trim()){ toast("Сначала произнесите или введите фразу"); return; }
+        const score = wordMatchScore(ex.phrase, said);
+        const pct = Math.round(score*100);
+        const ok = score >= 0.6;
+        const visualFb = pronounceFeedbackHtml(ex.phrase, said);
+        finalizeExercise(lesson, ok, `Совпадение слов: ${pct}%. ${visualFb}${ex.explain||""} ${ok?"":"Слова, отмеченные красным, не удалось распознать — попробуйте произнести фразу ещё раз, чётко проговаривая их."}`, ex);
+      }
+      if(a==="next-exercise"){
+        ui.exState = {}; ui.exIdx += 1;
+        if(ui.exIdx >= lesson.exercises.length && !(lesson.miniTest && lesson.miniTest.length)){
+          finalizeLessonCompletion(lesson);
+        }
+        renderApp();
+      }
+      if(a==="minitest-pick"){
+        const mq = lesson.miniTest[ui.miniTestIdx||0];
+        const i = parseInt(elm.dataset.i,10);
+        document.querySelectorAll(".opt-btn").forEach(b=>b.disabled=true);
+        const correct = i===mq.a;
+        elm.classList.add(correct?"correct":"wrong");
+        if(!correct) document.querySelectorAll(".opt-btn")[mq.a].classList.add("correct");
+        if(correct) ui.miniTestCorrect = (ui.miniTestCorrect||0) + 1;
+        ui.xpEarned = (ui.xpEarned||0) + (correct?5:1);
+        addXP(correct?5:1);
+        const fb = document.getElementById("ex-feedback");
+        fb.innerHTML = `<div class="feedback-box ${correct?'feedback-ok':'feedback-bad'}">
+            <b>${correct?"Верно!":"Не совсем."}</b> ${mq.explain||""}
+            <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-sm btn-primary" data-action="minitest-next" style="margin-left:auto;">Далее →</button>
+            </div>
+          </div>`;
+      }
+      if(a==="minitest-next"){
+        ui.miniTestIdx = (ui.miniTestIdx||0) + 1;
+        if(ui.miniTestIdx >= lesson.miniTest.length){
+          finalizeLessonCompletion(lesson);
+        }
+        renderApp();
+      }
+      if(a==="dialogue-from-lesson"){
+        currentView="dialogue"; ui.lessonId=null; dialoguePrefillTopic = elm.dataset.topic;
+        ui.dialogueLangFilter = elm.dataset.lang==="ky" ? "ky" : "en";
+        renderApp();
+      }
+      if(a==="ai-explain"){
+        const box = document.getElementById("ai-extra");
+        box.classList.remove("hidden"); box.textContent = "ИИ печатает объяснение…";
+        // Формулировка подстраивается под язык ТЕКУЩЕГО урока (английский/
+        // кыргызский), а не зашита под английский — иначе подсказка в
+        // кыргызском уроке была бы некорректной (п.5.4/5.8 ТЗ).
+        const exLesson = LESSONS.find(l=>l.id===ui.lessonId);
+        const exLangName = exLesson && exLesson.lang==="ky" ? "кыргызского" : "английского";
+        try{
+          const sample = await claude.use("sample");
+          if(!sample){ box.textContent = "ИИ-подсказки недоступны в этом окне."; return; }
+          const res = await sample(`Ты — дружелюбный преподаватель ${exLangName} языка. Объясни другими словами, максимально просто и коротко (2-3 предложения, на русском языке), следующую заметку для ученика${exLangName==="английского"?` уровня ${state.level||"A1"}`:""}: "${elm.dataset.exExplain}"`, {modelTier:"quick"});
+          box.textContent = "✨ " + res.text;
+        }catch(e){ box.textContent = "Не удалось получить объяснение от ИИ (" + (e.code||"ошибка") + ")."; }
+      }
+      if(a==="ai-example"){
+        const box = document.getElementById("ai-extra");
+        box.classList.remove("hidden"); box.textContent = "ИИ подбирает пример…";
+        const exLesson2 = LESSONS.find(l=>l.id===ui.lessonId);
+        const exLangName2 = exLesson2 && exLesson2.lang==="ky" ? "кыргызском" : "английском";
+        try{
+          const sample = await claude.use("sample");
+          if(!sample){ box.textContent = "ИИ-подсказки недоступны в этом окне."; return; }
+          const res = await sample(`Придумай ОДИН новый простой пример предложения на ${exLangName2} языке (с переводом на русский в скобках) на тему урока "${elm.dataset.topic}"${exLangName2==="английском"?`, подходящий для уровня ${state.level||"A1"}`:""}. Ответь только предложением, без пояснений.`, {modelTier:"quick"});
+          box.textContent = "✨ " + res.text;
+        }catch(e){ box.textContent = "Не удалось получить пример от ИИ (" + (e.code||"ошибка") + ")."; }
+      }
+}
+
+let _delegatedClickBound = false;
+function bindViewEvents(){
+  if(!_delegatedClickBound){
+    document.addEventListener("click", function(event){
+      const elm = event.target.closest("[data-action]");
+      if(!elm) return;
+      handleDataAction(elm);
+    });
+    // Drag-and-drop для упражнения "сопоставление" (п.5.7 ТЗ) — делегированные
+    // обработчики один раз на document, т.к. элементы перерисовываются целиком
+    // через innerHTML при каждом renderApp() (аналогично клику выше).
+    document.addEventListener("dragstart", function(event){
+      const elm = event.target.closest('[data-action="match-left"]');
+      if(!elm) return;
+      ui.exState.matchLeftSel = parseInt(elm.dataset.i,10);
+      try{ event.dataTransfer.setData("text/plain", elm.dataset.i); event.dataTransfer.effectAllowed = "move"; }catch(e){}
+    });
+    document.addEventListener("dragover", function(event){
+      const elm = event.target.closest('[data-action="match-right"]');
+      if(!elm) return;
+      event.preventDefault();
+      elm.classList.add("drag-over");
+    });
+    document.addEventListener("dragleave", function(event){
+      const elm = event.target.closest('[data-action="match-right"]');
+      if(elm) elm.classList.remove("drag-over");
+    });
+    document.addEventListener("drop", function(event){
+      const elm = event.target.closest('[data-action="match-right"]');
+      if(!elm) return;
+      event.preventDefault();
+      pairMatchRight(parseInt(elm.dataset.ri,10));
+    });
+    _delegatedClickBound = true;
+  }
+  // vocab / dialogue / profile bindings (elements are always freshly rendered
+  // by renderApp() right before this runs, so direct binding here is safe)
+  bindVocabEvents();
+  bindDialogueEvents();
+  bindProfileEvents();
+  bindAdminEvents();
+}
+
+function speak(text){
+  try{
+    if(!("speechSynthesis" in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US"; speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }catch(e){ /* TTS недоступен в этом браузере */ }
+}
+
+/* ============================================================
+   ДИАЛОГ С ИИ (п.5.5 ТЗ) — текстовый чат доступен на английском И на
+   кыргызском (у каждого языка своя история диалога, state.dialogue /
+   state.dialogueKy). Голосовой режим (STT/TTS) — только для английского:
+   речевые технологии для кыргызского требуют отдельного R&D (раздел 8 ТЗ),
+   поэтому в кыргызском режиме микрофон и озвучивание скрыты.
+============================================================ */
+let dialoguePrefillTopic = null;
+// Язык диалога выбирается пользователем свободно (переключатель ниже) и не
+// ограничен языками, выбранными при регистрации (п.5.1 ТЗ) — точно так же,
+// как вкладки "Английский/Кыргызча" в Уроках доступны независимо от выбора
+// при регистрации. targetLangs используется только чтобы предложить разумное
+// значение по умолчанию при первом заходе.
+function dialogueLang(){
+  let lang = ui.dialogueLangFilter;
+  if(!lang){
+    const targetLangs = (state.profile.targetLangs && state.profile.targetLangs.length) ? state.profile.targetLangs : ["en"];
+    lang = targetLangs.includes("en") ? "en" : "ky";
+  }
+  ui.dialogueLangFilter = lang;
+  return lang;
+}
+const DIALOGUE_TOPICS = {
+  en: ["Travel", "Daily routine", "Food", "Work", "Weekend plans"],
+  ky: ["Саякат", "Күнүмдүк жашоо", "Тамак-аш", "Жумуш", "Дем алыш күндөрү"]
+};
+function viewDialogue(){
+  const lang = dialogueLang();
+  const log = lang==="ky" ? state.dialogueKy : state.dialogue;
+  if(log.length===0){
+    const greet = lang==="ky"
+      ? `Салам, ${state.profile.name||"дос"}! Мен Mr. Penguin, сенин кыргыз тили мугалимиңмин 🐧. Каалаган темада же эркин сүйлөшө беребиз. Баштайлыбы?`
+      : `Hi ${state.profile.name||"there"}! I'm Mr. Penguin, your English tutor 🐧. We can chat about anything — or pick a topic below. Ready?`;
+    log.push({role:"assistant", content:greet, id:newMsgId()});
+  }
+  const topics = DIALOGUE_TOPICS[lang];
+  // Переключатель языка всегда доступен, как и вкладки "Английский/Кыргызча"
+  // в Уроках — не завязан на языки, выбранные при регистрации.
+  const langToggle = `
+    <div style="display:flex;gap:8px;margin-bottom:4px;">
+      <button class="btn btn-sm ${lang==='en'?'btn-primary':''}" data-action="set-dialogue-lang" data-lang="en">Английский</button>
+      <button class="btn btn-sm ${lang==='ky'?'btn-primary':''}" data-action="set-dialogue-lang" data-lang="ky">Кыргызча (текст)</button>
+    </div>`;
+  const kyVoiceNote = lang==="ky"
+    ? `<div class="card" style="background:var(--gold-soft);border-color:var(--gold);margin-bottom:14px;"><p style="margin:0;font-size:13px;color:var(--on-gold-soft);">Пока без голоса: диалог на кыргызском — только текстом. Голосовые технологии (распознавание/озвучивание речи) для кыргызского ещё в разработке.</p></div>`
+    : "";
+  const inputPlaceholder = lang==="ky" ? "Билдирүү жазыңыз (кыргызча)…" : "Write a message in English…";
+  const prefillText = dialoguePrefillTopic
+    ? (lang==="ky" ? `Келгиле, «${dialoguePrefillTopic}» темасы боюнча сүйлөшөлү.` : `Let's talk about ${dialoguePrefillTopic}.`)
+    : "";
+  const micBtnHtml = lang==="en" ? `<button class="btn btn-sm" id="mic-btn" title="Голосовой ввод (английский)" style="flex:none;">🎙️</button>` : "";
+  return `
+    <div class="page-head" style="display:flex;align-items:center;gap:14px;justify-content:space-between;flex-wrap:wrap;">
+      <div><div class="eyebrow">${t('navDialogue').toUpperCase()}</div><h1>Живое общение с Mr. Penguin</h1><p style="color:var(--muted)">ИИ мягко исправляет ошибки и объясняет их.</p></div>
+      <div style="flex:none;">${penguinSVG(56)}</div>
+    </div>
+    ${langToggle}
+    ${kyVoiceNote}
+    <div class="chat-wrap">
+      <div class="chat-log" id="chat-log">
+        ${log.map((m,i)=>`<div class="msg ${m.role==='user'?'msg-user':'msg-ai'}"><div class="msg-meta">${m.role==='user'?'ВЫ':'🐧 MR. PENGUIN'}</div>${escHtml(m.content)}${(m.role==='assistant'&&lang==='en')?` <button class="btn btn-sm btn-ghost" data-action="speak-dialogue-msg" data-idx="${i}" style="padding:2px 8px;margin-left:2px;vertical-align:middle;">🔊</button>`:''}</div>`).join("")}
+      </div>
+      <div style="padding:0 14px;display:flex;gap:6px;flex-wrap:wrap;">
+        ${topics.map(tp=>`<button class="btn btn-sm" data-action="chat-topic" data-topic="${tp}">${tp}</button>`).join("")}
+      </div>
+      <div class="chat-input-row">
+        ${micBtnHtml}
+        <input type="text" id="chat-input" placeholder="${inputPlaceholder}" value="${escAttr(prefillText)}">
+        <button class="btn btn-primary" data-action="chat-send">Отправить</button>
+      </div>
+    </div>`;
+}
+function bindDialogueEvents(){
+  const send = document.querySelector('[data-action="chat-send"]');
+  if(!send) return;
+  const lang = dialogueLang();
+  const input = document.getElementById("chat-input");
+  const doSend = ()=>sendChatMessage(input.value, lang);
+  send.onclick = doSend;
+  input.addEventListener("keydown", e=>{ if(e.key==="Enter") doSend(); });
+  const micBtn = document.getElementById("mic-btn");
+  if(micBtn){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){
+      micBtn.disabled = true; micBtn.title = "Голосовой ввод не поддерживается в этом браузере";
+    }else{
+      micBtn.onclick = ()=>{
+        const rec = new SR();
+        rec.lang = "en-US"; rec.interimResults = false; rec.maxAlternatives = 1;
+        micBtn.disabled = true; micBtn.textContent = "🔴";
+        rec.onresult = (e)=>{ if(input) input.value = e.results[0][0].transcript; };
+        rec.onerror = ()=>{ toast("Не удалось распознать речь"); };
+        rec.onend = ()=>{ micBtn.disabled = false; micBtn.textContent = "🎙️"; };
+        try{ rec.start(); }catch(err){ micBtn.disabled=false; micBtn.textContent="🎙️"; }
+      };
+    }
+  }
+  document.querySelectorAll('[data-action="chat-topic"]').forEach(b=>{
+    b.onclick = ()=>{
+      input.value = lang==="ky" ? `«${b.dataset.topic}» темасы боюнча сүйлөшөлү.` : `Let's talk about ${b.dataset.topic.toLowerCase()}.`;
+      input.focus();
+    };
+  });
+}
+async function sendChatMessage(text, lang){
+  text = (text||"").trim();
+  if(!text) return;
+  lang = lang==="ky" ? "ky" : "en";
+  const log = lang==="ky" ? state.dialogueKy : state.dialogue;
+  dialoguePrefillTopic = null;
+  const userMsgId = newMsgId();
+  log.push({role:"user", content:text, id:userMsgId});
+  moderateText(text, userMsgId);
+  if(log.length>16) log.splice(0, log.length-16);
+  markActivity(); checkBadges(); saveState();
+  renderApp();
+  const chatLog = document.getElementById("chat-log");
+  const thinkingEl = document.createElement("div");
+  thinkingEl.className = "msg msg-ai"; thinkingEl.innerHTML = `<div class="msg-meta">🐧 MR. PENGUIN</div><span class="typing"><span></span><span></span><span></span></span>`;
+  chatLog.appendChild(thinkingEl); chatLog.scrollTop = chatLog.scrollHeight;
+
+  try{
+    const sample = await claude.use("sample");
+    if(!sample){ thinkingEl.innerHTML = `<div class="msg-meta">🐧 MR. PENGUIN</div>ИИ-диалог недоступен в этом окне просмотра.`; return; }
+    const instructions = lang==="ky"
+      ? `Ты — дружелюбный, терпеливый преподаватель кыргызского языка, пингвин по имени Mr. Penguin. Уровень ученика по кыргызскому: «${kyLevelLabel(state.kyLevel)}». Правила:
+- Отвечай в основном на кыргызском, адаптируя сложность речи под уровень ученика (для «не знаю»/«начальный» — короткие простые фразы и добавляй перевод/пояснение на русском в скобках; для «бытовой»/«свободный» — почти всё на кыргызском).
+- Если ученик допускает ошибку (грамматика, лексика), мягко поправь: сначала кратко похвали за попытку, затем покажи правильный вариант и объясни ошибку ОДНИМ коротким предложением на русском.
+- Поддерживай диалог в рамках выбранной темы или свободного общения, задавай встречные вопросы.
+- Никогда не критикуй резко, будь тёплым и поддерживающим.`
+      : `Ты — дружелюбный, терпеливый преподаватель английского языка, пингвин по имени Mr. Penguin. Ученик имеет уровень ${state.level||"A1"} по CEFR. Правила:
+- Отвечай в основном на английском, адаптируя сложность речи под уровень ${state.level||"A1"}.
+- Если ученик допускает ошибку (грамматика/лексика), мягко поправь: сначала кратко похвали за попытку, затем покажи правильный вариант и объясни ошибку ОДНИМ коротким предложением (можно на русском, если уровень A1-A2).
+- Поддерживай диалог, задавай встречные вопросы по теме.
+- Никогда не критикуй резко, будь тёплым и поддерживающим.`;
+    const turns = [{role:"user", content: instructions}];
+    log.forEach(m=>turns.push({role:m.role, content:m.content}));
+
+    const res = await sample(turns, {
+      cache:false, modelTier:"default",
+      onText:({text})=>{ thinkingEl.innerHTML = `<div class="msg-meta">🐧 MR. PENGUIN</div>${escHtml(text)}`; chatLog.scrollTop = chatLog.scrollHeight; }
+    });
+    log.push({role:"assistant", content:res.text, id:newMsgId()});
+    addXP(5); saveState();
+  }catch(e){
+    const map = {not_granted:"Вы не разрешили ИИ-диалог в этом окне.", rate_limited:"Слишком много запросов — попробуйте чуть позже.", refused:"ИИ не смог ответить на это сообщение."};
+    thinkingEl.innerHTML = `<div class="msg-meta">🐧 MR. PENGUIN</div>${map[e.code]||"Произошла ошибка связи с ИИ."}`;
+  }
+}
+
+/* ============================================================
+   СЛОВАРЬ / FLASHCARDS (п.5.12 ТЗ, spaced repetition)
+============================================================ */
+function viewVocab(){
+  const due = state.vocab.filter(v=>v.nextReview<=todayStr());
+  return `
+    <div class="page-head"><div class="eyebrow">${t('navVocab').toUpperCase()}</div><h1>Словарь</h1><p style="color:var(--muted)">${state.vocab.length} слов · ${due.length} к повторению сегодня</p></div>
+    <div class="card">
+      <div class="eyebrow">ДОБАВИТЬ СЛОВО</div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <input type="text" id="voc-en" placeholder="слово (EN)" style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card-solid);color:var(--ink);">
+        <input type="text" id="voc-ru" placeholder="перевод (RU)" style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card-solid);color:var(--ink);">
+        <button class="btn btn-primary btn-sm" data-action="vocab-add">Добавить</button>
+      </div>
+    </div>
+    ${due.length>0 ? `<div class="card"><button class="btn btn-primary btn-block" data-action="review-start">🗂️ Повторить ${due.length} карточек →</button></div>` : ""}
+    <div class="card">
+      <div class="eyebrow">ВСЕ СЛОВА</div>
+      ${state.vocab.length===0 ? `<p style="color:var(--muted);">Пока пусто — добавьте слово выше.</p>` :
+        state.vocab.slice().reverse().map(v=>`<div class="vocab-row"><span>${v.en} — ${v.ru}</span><span class="box-dot">${[1,2,3,4,5].map(n=>`<i class="${v.box>=n?'on':''}"></i>`).join("")}</span></div>`).join("")}
+    </div>`;
+}
+function bindVocabEvents(){
+  const addBtn = document.querySelector('[data-action="vocab-add"]');
+  if(addBtn) addBtn.onclick=()=>{
+    const en = document.getElementById("voc-en").value.trim();
+    const ru = document.getElementById("voc-ru").value.trim();
+    if(!en||!ru) return;
+    state.vocab.push({id:"v"+Date.now(), en, ru, box:1, nextReview:todayStr(), dateAdded:todayStr()});
+    saveState(); renderApp();
+  };
+  const reviewBtn = document.querySelector('[data-action="review-start"]');
+  if(reviewBtn) reviewBtn.onclick=()=>{
+    ui.reviewQueue = state.vocab.filter(v=>v.nextReview<=todayStr()).map(v=>v.id);
+    ui.reviewIdx = 0; ui.flashRevealed=false;
+    renderReviewSession();
+  };
+}
+function renderReviewSession(){
+  const main = document.getElementById("main-content");
+  if(ui.reviewIdx >= ui.reviewQueue.length){
+    main.innerHTML = `<div class="page-head"><h1>Повторение завершено 🎉</h1></div><div class="card"><button class="btn btn-primary" data-action="goto" data-view="vocab">К словарю →</button></div>`;
+    bindViewEvents(); return;
+  }
+  const word = state.vocab.find(v=>v.id===ui.reviewQueue[ui.reviewIdx]);
+  main.innerHTML = `
+    <div class="page-head"><div class="eyebrow">ПОВТОРЕНИЕ ${ui.reviewIdx+1} / ${ui.reviewQueue.length}</div></div>
+    <div class="flash-card" id="flash-card">${ui.flashRevealed ? word.ru : word.en}</div>
+    <p style="text-align:center;color:var(--muted);font-size:13px;margin-top:8px;">Нажмите на карточку, чтобы увидеть перевод</p>
+    ${ui.flashRevealed ? `<div class="rate-row">
+        <button class="btn" data-rate="hard">Сложно</button>
+        <button class="btn" data-rate="ok">Нормально</button>
+        <button class="btn btn-primary" data-rate="easy">Легко</button>
+      </div>` : ""}`;
+  document.getElementById("flash-card").onclick=()=>{ ui.flashRevealed=true; renderReviewSession(); };
+  main.querySelectorAll("[data-rate]").forEach(b=>{
+    b.onclick=()=>{
+      const intervals=[1,2,4,7,14];
+      if(b.dataset.rate==="easy") word.box=Math.min(5,word.box+1);
+      else if(b.dataset.rate==="hard") word.box=1;
+      const days = intervals[word.box-1];
+      const d=new Date(); d.setDate(d.getDate()+days);
+      word.nextReview = d.toISOString().slice(0,10);
+      addXP(5);
+      ui.reviewIdx++; ui.flashRevealed=false;
+      saveState(); renderReviewSession();
+    };
+  });
+}
+
+/* ============================================================
+   ПРОГРЕСС (п.5.9 ТЗ): пройденные уроки/уровень (выше, на Главной, здесь —
+   счётчики), динамика ошибок, % усвоения по темам (в т.ч. грамматики),
+   время занятий, еженедельный/месячный отчёт.
+============================================================ */
+function formatStudyTime(min){
+  const total = Math.round(min||0);
+  if(total < 60) return `${total} мин`;
+  const h = Math.floor(total/60), m = total%60;
+  return `${h} ч${m?` ${m} мин`:""}`;
+}
+// Типы упражнений банка (п.5.7 ТЗ) сгруппированы по теме — "mcq"/"fill"
+// в этом банке заданий именно грамматические (выбор формы глагола и т.п.),
+// поэтому вместе дают "% усвоения грамматики" (п.5.9 ТЗ).
+const SKILL_LABELS = { mcq:"Грамматика", fill:"Грамматика", translate:"Письмо", match:"Лексика", listen:"Аудирование", reading:"Чтение", pronounce:"Произношение" };
+function aggregateSkillStats(){
+  const agg = {};
+  Object.keys(state.skillStats||{}).forEach(type=>{
+    const label = SKILL_LABELS[type] || type;
+    if(!agg[label]) agg[label] = {correct:0, total:0};
+    agg[label].correct += state.skillStats[type].correct;
+    agg[label].total += state.skillStats[type].total;
+  });
+  return agg;
+}
+function computeProgressReport(days){
+  const cutoff = new Date(Date.now() - (days-1)*86400000).toISOString().slice(0,10);
+  const lessonsInPeriod = Object.values(state.lessonsProgress).filter(l=>l.lastCompletedAt && l.lastCompletedAt>=cutoff).length;
+  let xpInPeriod = 0;
+  Object.keys(state.dailyXp||{}).forEach(d=>{ if(d>=cutoff) xpInPeriod += state.dailyXp[d]; });
+  const errorsInPeriod = state.errorsLog.filter(e=>e.date>=cutoff).length;
+  const vocabInPeriod = state.vocab.filter(v=>v.dateAdded && v.dateAdded>=cutoff).length;
+  return {lessonsInPeriod, xpInPeriod, errorsInPeriod, vocabInPeriod};
+}
+function viewProgress(){
+  const doneCount = Object.values(state.lessonsProgress).filter(l=>l.status==="done").length;
+  const attempts = Object.values(state.lessonsProgress).reduce((s,l)=>s+(l.attempts||0),0);
+  const days = [];
+  for(let i=27;i>=0;i--){ const d=new Date(Date.now()-i*86400000).toISOString().slice(0,10); days.push(d); }
+
+  // Динамика ошибок за последние 14 дней (столбчатый тренд, не просто список).
+  const errDays = [];
+  for(let i=13;i>=0;i--){ errDays.push(new Date(Date.now()-i*86400000).toISOString().slice(0,10)); }
+  const errCounts = errDays.map(d=>state.errorsLog.filter(e=>e.date===d).length);
+  const maxErr = Math.max(1, ...errCounts);
+
+  const skillAgg = aggregateSkillStats();
+  const skillLabelsPresent = Object.keys(skillAgg).filter(l=>skillAgg[l].total>0);
+  // "Грамматика" — явно названный в ТЗ показатель — всегда идёт первой строкой.
+  skillLabelsPresent.sort((a,b)=> a==="Грамматика" ? -1 : b==="Грамматика" ? 1 : a.localeCompare(b));
+
+  const reportDays = ui.progressReportDays===30 ? 30 : 7;
+  const report = computeProgressReport(reportDays);
+
+  return `
+    <div class="page-head"><div class="eyebrow">${t('navProgress').toUpperCase()}</div><h1>Прогресс и статистика</h1></div>
+    <div class="stat-row">
+      <div class="stat-chip"><div class="num">${doneCount}/${LESSONS.length}</div><div class="lbl">уроков пройдено</div></div>
+      <div class="stat-chip"><div class="num">${attempts}</div><div class="lbl">попыток всего</div></div>
+      <div class="stat-chip"><div class="num">${state.vocab.length}</div><div class="lbl">слов в словаре</div></div>
+      <div class="stat-chip"><div class="num">${state.xp}</div><div class="lbl">XP всего</div></div>
+      <div class="stat-chip"><div class="num">${state.streak.count}</div><div class="lbl">${t('streakUnit')}</div></div>
+      <div class="stat-chip"><div class="num">${formatStudyTime(state.studyMinutes)}</div><div class="lbl">время занятий</div></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">АКТИВНОСТЬ ЗА 28 ДНЕЙ</div>
+      <div class="cal-grid">${days.map(d=>`<div class="cal-cell ${state.activity[d]?'on':''}" title="${d}"></div>`).join("")}</div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">% УСВОЕНИЯ ПО ТЕМАМ</div>
+      ${skillLabelsPresent.length===0 ? `<p style="color:var(--muted);margin-top:6px;">Пока нет данных — пройдите несколько упражнений в уроках.</p>` :
+        skillLabelsPresent.map(label=>{
+          const s = skillAgg[label];
+          const pct = Math.round((s.correct/s.total)*100);
+          return `<div class="skill-row">
+            <span>${label}</span>
+            <div class="skill-bar-track"><div class="skill-bar-fill" style="width:${pct}%;"></div></div>
+            <span style="color:var(--muted);flex:none;">${pct}% (${s.correct}/${s.total})</span>
+          </div>`;
+        }).join("")}
+    </div>
+    <div class="card">
+      <div class="eyebrow">ДИНАМИКА ОШИБОК ЗА 14 ДНЕЙ</div>
+      ${state.errorsLog.length===0 ? `<p style="color:var(--muted);margin-top:6px;">Пока не зафиксировано — так держать!</p>` : `
+      <div class="trend-row">${errCounts.map((c,i)=>`<div class="trend-bar ${c===0?'empty':''}" style="height:${Math.max(6,Math.round(c/maxErr*100))}%;" title="${errDays[i]}: ${c} ошиб."></div>`).join("")}</div>
+      <p style="color:var(--muted);font-size:12px;margin-top:6px;">Ниже — детали последних ошибок и переход к повторению проблемной темы:</p>
+      <ul style="padding-left:0;list-style:none;margin:6px 0 0;">${state.errorsLog.slice(-5).reverse().map(e=>{
+        const lsn = LESSONS.find(l=>l.id===e.lessonId);
+        return `<li style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;flex-wrap:wrap;">
+          <span>${e.date} — урок «${lsn?lsn.title:e.lessonId}» (${e.exType})</span>
+          ${lsn ? `<button class="btn btn-sm" data-action="open-lesson" data-id="${lsn.id}">Повторить урок →</button>` : ""}
+        </li>`;
+      }).join("")}</ul>`}
+    </div>
+    <div class="card">
+      <div class="eyebrow">ОТЧЁТ О ПРОГРЕССЕ</div>
+      <div style="display:flex;gap:8px;margin:8px 0 12px;">
+        <button class="btn btn-sm ${reportDays===7?'btn-primary':''}" data-action="set-report-range" data-days="7">За неделю</button>
+        <button class="btn btn-sm ${reportDays===30?'btn-primary':''}" data-action="set-report-range" data-days="30">За месяц</button>
+      </div>
+      <div class="stat-row" style="margin-bottom:0;">
+        <div class="stat-chip"><div class="num">${report.lessonsInPeriod}</div><div class="lbl">уроков завершено</div></div>
+        <div class="stat-chip"><div class="num">${report.xpInPeriod}</div><div class="lbl">XP заработано</div></div>
+        <div class="stat-chip"><div class="num">${report.vocabInPeriod}</div><div class="lbl">новых слов</div></div>
+        <div class="stat-chip"><div class="num">${report.errorsInPeriod}</div><div class="lbl">ошибок</div></div>
+      </div>
+    </div>`;
+}
+
+/* ============================================================
+   ПРОФИЛЬ / НАСТРОЙКИ (п.5.1, 5.11 ТЗ)
+============================================================ */
+function viewProfile(){
+  const theme = document.documentElement.getAttribute("data-theme")||"auto";
+  return `
+    <div class="page-head"><div class="eyebrow">${t('navProfile').toUpperCase()}</div><h1>Профиль и настройки</h1></div>
+    ${state.userEmail ? `<div class="card">
+      <div class="eyebrow">АККАУНТ</div>
+      <p style="margin-top:6px;">Вы вошли как <b>${escHtml(state.userEmail)}</b>${sbClient?" · данные синхронизируются с сервером (Supabase)":""}</p>
+      <button class="btn btn-sm" data-action="logout" style="margin-top:6px;">Выйти из аккаунта</button>
+    </div>` : ""}
+    <div class="grid-2">
+      <div class="card">
+        <div class="eyebrow">ПРОФИЛЬ</div>
+        <div class="field"><label>Имя</label><input type="text" id="p-name" value="${state.profile.name}"></div>
+        <div class="field"><label>Возраст</label><input type="number" id="p-age" value="${state.profile.age}"></div>
+        <div class="field"><label>Цель</label>
+          <select id="p-goal">
+            ${["travel","work","exam","general"].map(g=>`<option value="${g}" ${state.profile.goal===g?"selected":""}>${goalLabel(g)}</option>`).join("")}
+          </select>
+        </div>
+        <div class="field"><label>Уроков в неделю (учебный план)</label>
+          <input type="number" id="p-weekly" min="1" max="14" value="${state.weeklyLessons||4}">
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <button class="btn btn-primary btn-sm" data-action="save-profile">Сохранить</button>
+          <span class="badge badge-level">Бесплатный план</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="eyebrow">НАСТРОЙКИ</div>
+        <div class="field"><label>Язык интерфейса</label>
+          <select id="p-lang" class="lang-select">
+            <option value="ru" ${state.profile.interfaceLang==="ru"?"selected":""}>Русский</option>
+            <option value="ky" ${state.profile.interfaceLang==="ky"?"selected":""}>Кыргызча</option>
+            <option value="en" ${state.profile.interfaceLang==="en"?"selected":""}>English</option>
+          </select>
+        </div>
+        <div class="field"><label>Часовой пояс</label><input type="text" id="p-tz" value="${state.profile.timezone}"></div>
+        <div class="field"><label style="display:flex;align-items:center;justify-content:space-between;">Уведомления о занятиях
+          <label class="switch"><input type="checkbox" id="p-notif" ${state.profile.notifications?"checked":""}><span class="slider"></span></label>
+        </label>
+        <p style="font-size:12px;color:var(--muted);margin-top:4px;">Напоминания позаниматься и повторить слова из словаря. Работают через браузер, пока это окно открыто — полноценный push, когда приложение закрыто, требует отдельного сервера.</p>
+        </div>
+        <div class="field"><label style="display:flex;align-items:center;justify-content:space-between;">Тёмная тема
+          <label class="switch"><input type="checkbox" id="p-theme" ${theme!=="light"?"checked":""}><span class="slider"></span></label>
+        </label></div>
+      </div>
+    </div>
+    ${isAdminUser() ? `<div class="card">
+      <div class="eyebrow">АДМИНИСТРИРОВАНИЕ</div>
+      <p style="color:var(--muted);font-size:13px;margin-top:4px;">У этой учётной записи есть доступ к панели администратора.</p>
+      <button class="btn btn-sm" data-action="goto" data-view="admin" style="margin-top:8px;">Открыть панель администратора →</button>
+    </div>` : ""}
+    <div class="card">
+      <button class="btn btn-danger" data-action="reset-progress">Сбросить весь прогресс</button>
+    </div>`;
+}
+function bindProfileEvents(){
+  const save = document.querySelector('[data-action="save-profile"]');
+  if(save) save.onclick=()=>{
+    const nameInput = document.getElementById("p-name");
+    const ageInput = document.getElementById("p-age");
+    nameInput.classList.remove("field-invalid"); ageInput.classList.remove("field-invalid");
+    const nameVal = nameInput.value.trim();
+    const ageVal = ageInput.value.trim();
+    const ageNum = parseInt(ageVal, 10);
+    if(!nameVal){ nameInput.classList.add("field-invalid"); toast("Введите имя"); return; }
+    if(!ageVal || isNaN(ageNum) || ageNum<5 || ageNum>100){ ageInput.classList.add("field-invalid"); toast("Введите корректный возраст (от 5 до 100)"); return; }
+    state.profile.name = nameVal;
+    state.profile.age = ageVal;
+    state.profile.goal = document.getElementById("p-goal").value;
+    const weeklyVal = parseInt(document.getElementById("p-weekly").value, 10);
+    state.weeklyLessons = (weeklyVal>=1 && weeklyVal<=14) ? weeklyVal : (state.weeklyLessons||4);
+    saveState(); toast("Профиль сохранён"); renderApp();
+  };
+  const langSel = document.getElementById("p-lang");
+  if(langSel) langSel.onchange=()=>{ state.profile.interfaceLang = langSel.value; saveState(); renderApp(); };
+  const tz = document.getElementById("p-tz");
+  if(tz) tz.onchange=()=>{ state.profile.timezone = tz.value; saveState(); };
+  const notif = document.getElementById("p-notif");
+  if(notif) notif.onchange=()=>{
+    state.profile.notifications = notif.checked; saveState();
+    if(notif.checked && typeof Notification !== "undefined" && Notification.permission==="default"){
+      Notification.requestPermission().then(()=>{ maybeShowStudyReminder(); });
+    }
+    toast(notif.checked?"Уведомления включены":"Уведомления выключены");
+  };
+  const themeSw = document.getElementById("p-theme");
+  if(themeSw) themeSw.onchange=()=>{
+    // checked = фирменная тёмная тема (по умолчанию); снято = светлая тема
+    if(themeSw.checked){ document.documentElement.removeAttribute("data-theme"); }
+    else{ document.documentElement.setAttribute("data-theme", "light"); }
+    try{ localStorage.setItem("aitutor_theme", themeSw.checked?"":"light"); }catch(e){}
+  };
+  const reset = document.querySelector('[data-action="reset-progress"]');
+  if(reset) reset.onclick=async ()=>{
+    if(confirm("Точно сбросить весь прогресс? Это действие необратимо.")){
+      // Сбрасываем именно содержимое состояния (сохраняя привязку к аккаунту),
+      // а не просто локальный кэш — иначе после входа Supabase тут же вернул
+      // бы старый прогресс с сервера поверх "сброшенного".
+      const keepAccount = { userId: state.userId, userEmail: state.userEmail };
+      state = Object.assign(defaultState(), keepAccount);
+      try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+      if(sbClient && state.userId){ clearTimeout(sbSyncTimer); await syncStateToSupabase(); }
+      location.reload();
+    }
+  };
+}
+
+/* ============================================================
+   АДМИН-ПАНЕЛЬ (п.5.13 ТЗ) — управление контентом и модерация
+   диалогов ИИ. Доступна только владельцу продукта (см. ADMIN_EMAIL
+   и isAdminUser() выше) — определяется по e-mail учётной записи,
+   выполнившей вход через Supabase.
+============================================================ */
+function viewAdmin(){
+  const tab = ui.adminTab || "content";
+  const allLessons = EN_LESSONS.concat(KY_LESSONS);
+  const pending = state.moderationLog.filter(f=>f.status==="pending");
+
+  const contentTab = `
+    <div class="card">
+      <div class="eyebrow">УРОКИ</div>
+      <p style="color:var(--muted);font-size:13px;margin-top:4px;">Скрытые уроки не показываются ученикам в списке уроков и на главной, но прогресс по ним сохраняется.</p>
+      ${allLessons.map(l=>{
+        const hidden = isLessonHidden(l.id);
+        return `<div class="lesson-card" style="border-bottom:1px solid var(--border);">
+          <div><h3>${l.title}</h3><p>${l.lang==="en"?"Английский":"Кыргызский"} · ${l.level}</p></div>
+          <button class="btn btn-sm ${hidden?'':'btn-primary'}" data-action="admin-toggle-lesson" data-id="${l.id}">${hidden?"Скрыт — опубликовать":"Опубликован — скрыть"}</button>
+        </div>`;
+      }).join("")}
+    </div>`;
+
+  const modTab = `
+    <div class="card">
+      <div class="eyebrow">МОДЕРАЦИЯ ДИАЛОГОВ С ИИ</div>
+      <p style="color:var(--muted);font-size:13px;margin-top:4px;">Сообщения учеников автоматически проверяются простым фильтром ключевых слов (грубость, запрос личных данных, темы вне обучения) и попадают сюда на ручной просмотр.</p>
+      ${state.moderationLog.length===0 ? `<p style="color:var(--muted);margin-top:10px;">Пока нет отмеченных сообщений.</p>` :
+        state.moderationLog.slice().reverse().map(f=>`
+        <div class="lesson-card" style="border-bottom:1px solid var(--border);align-items:flex-start;">
+          <div style="flex:1;">
+            <span class="badge ${f.status==='pending'?'badge-progress':f.status==='removed'?'':'badge-done'}">${f.status==='pending'?'на проверке':f.status==='removed'?'удалено':'просмотрено'}</span>
+            <span class="badge badge-level" style="margin-left:6px;">${escHtml(f.category)}</span>
+            <p style="margin:6px 0 0;">«${escHtml(f.text)}»</p>
+            <p style="color:var(--muted);font-size:12px;margin:4px 0 0;">${new Date(f.ts).toLocaleString("ru-RU")}</p>
+          </div>
+          ${f.status==="pending" ? `<div style="display:flex;gap:6px;flex:none;">
+            <button class="btn btn-sm" data-action="admin-resolve-flag" data-id="${f.id}">Отметить просмотренным</button>
+            <button class="btn btn-sm btn-danger" data-action="admin-remove-msg" data-id="${f.id}">Удалить сообщение</button>
+          </div>` : ""}
+        </div>`).join("")}
+    </div>`;
+
+  // "Просмотр статистики пользователей (агрегированной)" (п.5.13 ТЗ). Честное
+  // ограничение: это локальная демо-панель без выделенного бэкенда (см.
+  // заголовок ниже) — здесь нет отдельной таблицы "все пользователи"
+  // (в реальном проде это была бы серверная агрегация по всем аккаунтам
+  // через service-role/админ-API, что выходит за рамки клиентского демо
+  // со anon-ключом и RLS). Показываем агрегированные показатели по всем
+  // данным, которые реально доступны этой панели — своему аккаунту и
+  // очереди модерации — как рабочий прообраз того же экрана.
+  const doneCount = Object.values(state.lessonsProgress).filter(l=>l.status==="done").length;
+  const skillAgg = aggregateSkillStats();
+  const skillLabelsPresent = Object.keys(skillAgg).filter(l=>skillAgg[l].total>0);
+  const modResolved = state.moderationLog.filter(f=>f.status!=="pending").length;
+  const statsTab = `
+    <div class="card">
+      <div class="eyebrow">СТАТИСТИКА (АГРЕГИРОВАННО)</div>
+      <p style="color:var(--muted);font-size:13px;margin-top:4px;">Показатели ниже считаются по данным, доступным этой учётной записи и очереди модерации. Полная сводная статистика по всем пользователям продукта потребует отдельной серверной агрегации (админ-API поверх Supabase).</p>
+      <div class="stat-row" style="margin-top:12px;">
+        <div class="stat-chip"><div class="num">${doneCount}/${LESSONS.length}</div><div class="lbl">уроков пройдено</div></div>
+        <div class="stat-chip"><div class="num">${state.xp}</div><div class="lbl">XP всего</div></div>
+        <div class="stat-chip"><div class="num">${state.streak.count}</div><div class="lbl">${t('streakUnit')}</div></div>
+        <div class="stat-chip"><div class="num">${state.vocab.length}</div><div class="lbl">слов в словаре</div></div>
+        <div class="stat-chip"><div class="num">${formatStudyTime(state.studyMinutes)}</div><div class="lbl">время занятий</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">КОНТЕНТ</div>
+      <div class="stat-row" style="margin-bottom:0;">
+        <div class="stat-chip"><div class="num">${allLessons.length}</div><div class="lbl">уроков всего</div></div>
+        <div class="stat-chip"><div class="num">${allLessons.filter(l=>!isLessonHidden(l.id)).length}</div><div class="lbl">опубликовано</div></div>
+        <div class="stat-chip"><div class="num">${allLessons.filter(l=>isLessonHidden(l.id)).length}</div><div class="lbl">скрыто</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">МОДЕРАЦИЯ</div>
+      <div class="stat-row" style="margin-bottom:0;">
+        <div class="stat-chip"><div class="num">${state.moderationLog.length}</div><div class="lbl">сообщений отмечено</div></div>
+        <div class="stat-chip"><div class="num">${pending.length}</div><div class="lbl">на проверке</div></div>
+        <div class="stat-chip"><div class="num">${modResolved}</div><div class="lbl">обработано</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">% УСВОЕНИЯ ПО ТЕМАМ</div>
+      ${skillLabelsPresent.length===0 ? `<p style="color:var(--muted);margin-top:6px;">Пока нет данных.</p>` :
+        skillLabelsPresent.map(label=>{
+          const s = skillAgg[label]; const pct = Math.round((s.correct/s.total)*100);
+          return `<div class="skill-row"><span>${label}</span>
+            <div class="skill-bar-track"><div class="skill-bar-fill" style="width:${pct}%;"></div></div>
+            <span style="color:var(--muted);flex:none;">${pct}% (${s.correct}/${s.total})</span></div>`;
+        }).join("")}
+    </div>`;
+
+  return `
+    <div class="page-head"><div class="eyebrow">${t('navAdmin').toUpperCase()}</div><h1>Панель администратора</h1>
+      <p style="color:var(--muted);">Управление контентом, модерация диалогов ИИ и агрегированная статистика.</p>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <button class="btn btn-sm ${tab==='content'?'btn-primary':''}" data-action="admin-tab" data-tab="content">Контент</button>
+      <button class="btn btn-sm ${tab==='moderation'?'btn-primary':''}" data-action="admin-tab" data-tab="moderation">Модерация ${pending.length>0?`(${pending.length})`:""}</button>
+      <button class="btn btn-sm ${tab==='stats'?'btn-primary':''}" data-action="admin-tab" data-tab="stats">Статистика</button>
+    </div>
+    ${tab==="content" ? contentTab : tab==="stats" ? statsTab : modTab}`;
+}
+function bindAdminEvents(){ /* все действия — через делегированный data-action, доп. привязки не требуются */ }
+
+/* ============================================================
+   INIT
+============================================================ */
+try{
+  const savedTheme = localStorage.getItem("aitutor_theme");
+  if(savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
+}catch(e){}
+
+// Точка входа (п.5.1 ТЗ): сначала настройка бэкенда (один раз на устройстве),
+// затем вход/регистрация по e-mail через Supabase, и только потом —
+// онбординг/приложение. См. bootAuthFlow().
+bootAuthFlow();
+
+})();
+</script>
+</body>
+</html>
