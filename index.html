@@ -492,6 +492,60 @@ function initSupabaseClient(){
   return sbClient;
 }
 
+/* ============================================================
+   ИИ-ДИАЛОГ (п.5.5/5.8 ТЗ) — модель Groq напрямую с клиента.
+   Изначально этот же чат работал через claude.use("sample") — встроенную
+   в claude.ai-артефакты функцию сэмплинга. Она доступна ТОЛЬКО пока
+   страница открыта по ссылке артефакта claude.ai; на самостоятельном
+   хостинге (GitHub Pages/Netlify) и в Android-приложении её просто нет
+   в браузере, поэтому диалог с ИИ там не работал вовсе. Здесь — прямой
+   вызов бесплатного Groq API (OpenAI-совместимый chat-completions
+   эндпоинт, открытые модели вроде Llama), который работает где угодно.
+   Честное ограничение: ключ ниже виден любому в исходном коде страницы —
+   в отличие от anon-ключа Supabase, это НЕ предназначено для широкой
+   публикации (см. пояснение в переписке); для приватного учебного показа
+   это приемлемо, для настоящего продукта потребовался бы сервер-прокси,
+   прячущий ключ (например, Supabase Edge Function).
+============================================================ */
+const GROQ_API_KEY = "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";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
+async function groqGenerate(systemText, turns){
+  if(!GROQ_API_KEY){
+    const err = new Error("Groq API-ключ не настроен");
+    err.noKey = true;
+    throw err;
+  }
+  const messages = [];
+  if(systemText) messages.push({ role:"system", content: systemText });
+  turns.forEach(m=>messages.push({ role: m.role==="assistant" ? "assistant" : "user", content: m.content }));
+  const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type":"application/json", "Authorization":"Bearer " + GROQ_API_KEY },
+    body: JSON.stringify({ model: GROQ_MODEL, messages, temperature: 0.7, max_tokens: 500 })
+  });
+  if(!resp.ok){
+    let detail = "";
+    try{ const j = await resp.json(); detail = (j && j.error && j.error.message) || ""; }catch(e){ /* ignore */ }
+    const err = new Error("Groq API error " + resp.status + (detail ? ": " + detail : ""));
+    err.status = resp.status;
+    throw err;
+  }
+  const data = await resp.json();
+  const text = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+  if(!text){
+    const err = new Error("Groq: пустой ответ");
+    err.empty = true;
+    throw err;
+  }
+  return text;
+}
+function aiErrorMessage(e){
+  if(e && e.noKey) return "ИИ-диалог пока не настроен (не хватает API-ключа).";
+  if(e && e.status===429) return "Слишком много запросов — попробуйте чуть позже.";
+  if(e && (e.status===400 || e.status===403)) return "ИИ не смог ответить на это сообщение.";
+  return "Произошла ошибка связи с ИИ.";
+}
+
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 function markActivity(){
   const d = todayStr();
@@ -1822,11 +1876,10 @@ async function handleDataAction(elm){
         const exLesson = LESSONS.find(l=>l.id===ui.lessonId);
         const exLangName = exLesson && exLesson.lang==="ky" ? "кыргызского" : "английского";
         try{
-          const sample = await claude.use("sample");
-          if(!sample){ box.textContent = "ИИ-подсказки недоступны в этом окне."; return; }
-          const res = await sample(`Ты — дружелюбный преподаватель ${exLangName} языка. Объясни другими словами, максимально просто и коротко (2-3 предложения, на русском языке), следующую заметку для ученика${exLangName==="английского"?` уровня ${state.level||"A1"}`:""}: "${elm.dataset.exExplain}"`, {modelTier:"quick"});
-          box.textContent = "✨ " + res.text;
-        }catch(e){ box.textContent = "Не удалось получить объяснение от ИИ (" + (e.code||"ошибка") + ")."; }
+          const prompt = `Ты — дружелюбный преподаватель ${exLangName} языка. Объясни другими словами, максимально просто и коротко (2-3 предложения, на русском языке), следующую заметку для ученика${exLangName==="английского"?` уровня ${state.level||"A1"}`:""}: "${elm.dataset.exExplain}"`;
+          const text = await groqGenerate(null, [{role:"user", content: prompt}]);
+          box.textContent = "✨ " + text;
+        }catch(e){ box.textContent = "Не удалось получить объяснение от ИИ. " + aiErrorMessage(e); }
       }
       if(a==="ai-example"){
         const box = document.getElementById("ai-extra");
@@ -1834,11 +1887,10 @@ async function handleDataAction(elm){
         const exLesson2 = LESSONS.find(l=>l.id===ui.lessonId);
         const exLangName2 = exLesson2 && exLesson2.lang==="ky" ? "кыргызском" : "английском";
         try{
-          const sample = await claude.use("sample");
-          if(!sample){ box.textContent = "ИИ-подсказки недоступны в этом окне."; return; }
-          const res = await sample(`Придумай ОДИН новый простой пример предложения на ${exLangName2} языке (с переводом на русский в скобках) на тему урока "${elm.dataset.topic}"${exLangName2==="английском"?`, подходящий для уровня ${state.level||"A1"}`:""}. Ответь только предложением, без пояснений.`, {modelTier:"quick"});
-          box.textContent = "✨ " + res.text;
-        }catch(e){ box.textContent = "Не удалось получить пример от ИИ (" + (e.code||"ошибка") + ")."; }
+          const prompt = `Придумай ОДИН новый простой пример предложения на ${exLangName2} языке (с переводом на русский в скобках) на тему урока "${elm.dataset.topic}"${exLangName2==="английском"?`, подходящий для уровня ${state.level||"A1"}`:""}. Ответь только предложением, без пояснений.`;
+          const text = await groqGenerate(null, [{role:"user", content: prompt}]);
+          box.textContent = "✨ " + text;
+        }catch(e){ box.textContent = "Не удалось получить пример от ИИ. " + aiErrorMessage(e); }
       }
 }
 
@@ -2015,8 +2067,6 @@ async function sendChatMessage(text, lang){
   chatLog.appendChild(thinkingEl); chatLog.scrollTop = chatLog.scrollHeight;
 
   try{
-    const sample = await claude.use("sample");
-    if(!sample){ thinkingEl.innerHTML = `<div class="msg-meta">🐧 MR. PENGUIN</div>ИИ-диалог недоступен в этом окне просмотра.`; return; }
     const instructions = lang==="ky"
       ? `Ты — дружелюбный, терпеливый преподаватель кыргызского языка, пингвин по имени Mr. Penguin. Уровень ученика по кыргызскому: «${kyLevelLabel(state.kyLevel)}». Правила:
 - Отвечай в основном на кыргызском, адаптируя сложность речи под уровень ученика (для «не знаю»/«начальный» — короткие простые фразы и добавляй перевод/пояснение на русском в скобках; для «бытовой»/«свободный» — почти всё на кыргызском).
@@ -2028,18 +2078,18 @@ async function sendChatMessage(text, lang){
 - Если ученик допускает ошибку (грамматика/лексика), мягко поправь: сначала кратко похвали за попытку, затем покажи правильный вариант и объясни ошибку ОДНИМ коротким предложением (можно на русском, если уровень A1-A2).
 - Поддерживай диалог, задавай встречные вопросы по теме.
 - Никогда не критикуй резко, будь тёплым и поддерживающим.`;
-    const turns = [{role:"user", content: instructions}];
-    log.forEach(m=>turns.push({role:m.role, content:m.content}));
+    const turns = log.map(m=>({role:m.role, content:m.content}));
 
-    const res = await sample(turns, {
-      cache:false, modelTier:"default",
-      onText:({text})=>{ thinkingEl.innerHTML = `<div class="msg-meta">🐧 MR. PENGUIN</div>${escHtml(text)}`; chatLog.scrollTop = chatLog.scrollHeight; }
-    });
-    log.push({role:"assistant", content:res.text, id:newMsgId()});
+    const replyText = await groqGenerate(instructions, turns);
+    thinkingEl.innerHTML = `<div class="msg-meta">🐧 MR. PENGUIN</div>${escHtml(replyText)}`; chatLog.scrollTop = chatLog.scrollHeight;
+    log.push({role:"assistant", content:replyText, id:newMsgId()});
+    // Re-apply the 16-turn history cap: the reply above is pushed AFTER the
+    // trim near the top of this function (which only accounted for the
+    // user's own message), so without this the log could grow to 17 here.
+    if(log.length>16) log.splice(0, log.length-16);
     addXP(5); saveState();
   }catch(e){
-    const map = {not_granted:"Вы не разрешили ИИ-диалог в этом окне.", rate_limited:"Слишком много запросов — попробуйте чуть позже.", refused:"ИИ не смог ответить на это сообщение."};
-    thinkingEl.innerHTML = `<div class="msg-meta">🐧 MR. PENGUIN</div>${map[e.code]||"Произошла ошибка связи с ИИ."}`;
+    thinkingEl.innerHTML = `<div class="msg-meta">🐧 MR. PENGUIN</div>${aiErrorMessage(e)}`;
   }
 }
 
