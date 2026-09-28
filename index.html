@@ -493,59 +493,48 @@ function initSupabaseClient(){
 }
 
 /* ============================================================
-   ИИ-ДИАЛОГ (п.5.5/5.8 ТЗ) — модель Google Gemini напрямую с клиента.
-   Изначально этот же чат работал через claude.use("sample") — встроенную
-   в claude.ai-артефакты функцию сэмплинга. Она доступна ТОЛЬКО пока
-   страница открыта по ссылке артефакта claude.ai; на самостоятельном
-   хостинге (GitHub Pages/Netlify) и в Android-приложении её просто нет
-   в браузере, поэтому диалог с ИИ там не работал вовсе. Здесь — прямой
-   вызов бесплатного Gemini API, который работает где угодно.
-   Честное ограничение: ключ ниже виден любому в исходном коде страницы —
-   в отличие от anon-ключа Supabase, это НЕ предназначено для широкой
-   публикации (см. пояснение в переписке); для приватного учебного показа
-   это приемлемо, для настоящего продукта потребовался бы сервер-прокси,
-   прячущий ключ (например, Supabase Edge Function).
+   ИИ-ДИАЛОГ (п.5.5/5.8 ТЗ) — через сервер-прокси (Supabase Edge Function
+   "ai-chat", см. supabase/functions/ai-chat/index.ts), а не напрямую к
+   Gemini с клиента.
+   История: сначала этот чат работал через claude.use("sample") — встроенную
+   в claude.ai-артефакты функцию сэмплинга, доступную ТОЛЬКО по ссылке
+   артефакта claude.ai (на самостоятельном хостинге и в Android её просто
+   нет в браузере). Заменили на прямой вызов Gemini API с клиента — но это
+   означало держать настоящий API-ключ прямо в открытом исходном коде
+   страницы, а такие ключи автоматически находят и отзывают сканеры
+   Google/GitHub, как только страница становится публично видна. Поэтому
+   ключ теперь живёт только на сервере (в секретах Supabase Edge Function),
+   а браузер обращается к своей же функции — ключ туда просто не попадает.
 ============================================================ */
-const GEMINI_API_KEY = "AQ.Ab8RN6IE1taX87qb9bbk5gFS_tDzYW5bgbNkVBjvpQS91BdDqA";
-const GEMINI_MODEL = "gemini-2.0-flash";
 async function geminiGenerate(systemText, turns){
-  if(!GEMINI_API_KEY){
-    const err = new Error("Gemini API-ключ не настроен");
-    err.noKey = true;
-    throw err;
-  }
-  const contents = turns.map(m=>({
-    role: m.role==="assistant" ? "model" : "user",
-    parts: [{ text: m.content }]
-  }));
-  const body = { contents, generationConfig: { temperature: 0.7, maxOutputTokens: 500 } };
-  if(systemText) body.systemInstruction = { parts: [{ text: systemText }] };
-  const resp = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-    { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) }
-  );
+  const resp = await fetch(`${DEFAULT_SUPABASE_URL}/functions/v1/ai-chat`, {
+    method: "POST",
+    headers: { "Content-Type":"application/json", "Authorization":"Bearer " + DEFAULT_SUPABASE_ANON_KEY },
+    body: JSON.stringify({ systemText: systemText || null, turns })
+  });
+  let data = {};
+  try{ data = await resp.json(); }catch(e){ /* ignore */ }
   if(!resp.ok){
-    let detail = "";
-    try{ const j = await resp.json(); detail = (j && j.error && j.error.message) || ""; }catch(e){ /* ignore */ }
-    const err = new Error("Gemini API error " + resp.status + (detail ? ": " + detail : ""));
+    const err = new Error(data.error || ("Ошибка сервера " + resp.status));
     err.status = resp.status;
     throw err;
   }
-  const data = await resp.json();
-  const cand = data && data.candidates && data.candidates[0];
-  const text = cand && cand.content && cand.content.parts ? cand.content.parts.map(p=>p.text||"").join("") : "";
-  if(!text){
-    const err = new Error("Gemini: пустой ответ (возможно, сработал фильтр безопасности)");
+  if(!data.text){
+    const err = new Error("Пустой ответ от ИИ");
     err.empty = true;
     throw err;
   }
-  return text;
+  return data.text;
 }
 function aiErrorMessage(e){
   if(e && e.noKey) return "ИИ-диалог пока не настроен (не хватает API-ключа).";
   if(e && e.status===429) return "Слишком много запросов — попробуйте чуть позже.";
   if(e && (e.status===400 || e.status===403)) return "ИИ не смог ответить на это сообщение.";
-  return "Произошла ошибка связи с ИИ.";
+  // Показываем причину прямо в интерфейсе (код ответа/текст ошибки), а не
+  // только общую фразу — иначе диагностировать проблему можно только через
+  // консоль разработчика браузера, что неудобно для обычного пользователя.
+  const detail = (e && e.message) ? e.message : "";
+  return "Произошла ошибка связи с ИИ" + (detail ? " (" + detail + ")" : "") + ".";
 }
 
 function todayStr(){ return new Date().toISOString().slice(0,10); }
